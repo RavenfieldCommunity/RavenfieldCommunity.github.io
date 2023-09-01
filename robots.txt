@@ -1,5 +1,6 @@
 
 User-agent:*
 Disallow: /*/Components/
+Disallow: /*/CONTRIBUTING.html
 
 Sitemap: https://ravenfieldcommunity.github.io/docs/sitemap.xml
