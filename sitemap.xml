@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="/docs/sitemap.xsl"?>
+<n1:urlset xmlns:n1="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+    <n1:url>
+        <n1:loc>https://ravenfieldcommunity.github.io/docs/</n1:loc>
+        <n1:changefreq>daily</n1:changefreq>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://ravenfieldcommunity.github.io/docs/cn/"/>
+        <xhtml:link rel="alternate" hreflang="en-US" href="https://ravenfieldcommunity.github.io/docs/en/"/>
+        <xhtml:link rel="alternate" hreflang="zh-CN" href="https://ravenfieldcommunity.github.io/docs/"/>
+    </n1:url>
+</n1:urlset>
