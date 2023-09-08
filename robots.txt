@@ -1,6 +1,7 @@
 
-User-agent:*
-Disallow: /*/Components/
-Disallow: /*/CONTRIBUTING.html
+user-agent:*
+disallow: /
+allow: /cn/index.html
+allow: /en/index.html
 
-Sitemap: https://ravenfieldcommunity.github.io/docs/sitemap.xml
+sitemap: https://ravenfieldcommunity.github.io/sitemap.xml
