@@ -1,7 +1,4 @@
 
 user-agent:*
-disallow: /
-allow: /cn/index.html
-allow: /en/index.html
 
 sitemap: https://ravenfieldcommunity.github.io/sitemap.xml
