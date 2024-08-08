@@ -3,7 +3,25 @@
     <url>
         <loc>https://ravenfieldcommunity.github.io/docs/cn/</loc>
     </url>
-    <url>
+        <url>
         <loc>https://ravenfieldcommunity.github.io/docs/en/</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/cn/Tutorials/</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/cn/Project/rsidea.html</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/en/Project/rsidea.html</loc>
+    </url>
+    <url>
+        <loc>https://ravenfieldcommunity.github.io/docs/cn/RESOURCE.html</loc>
     </url>
 </urlset>
