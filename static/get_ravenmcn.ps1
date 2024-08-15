@@ -9,7 +9,7 @@ Try {
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
   $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-  Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down" `
+  #Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down" `
     -WebSession $session `
     -OutFile .\RavenMCN.zip `
     -Headers @{
@@ -33,10 +33,13 @@ Try {
 }
 Catch 
 { 
-  Out-String -InputObject "安装文件下载失败，请检查网络或反馈给社区管理" pause
-  exit 1 
+  Out-String -InputObject "安装文件下载失败，请检查网络或反馈给社区管理"
+  Read-Host -prompt " " 
+  Read-Host -prompt " "
+  exit 1
 }
-Finally { Out-String -InputObject "安装文件下载成功" }
+
+Out-String -InputObject "安装文件下载成功"
 
 #校验hash
 $hash1 = Get-FileHash .\RavenMCN.zip -Algorithm SHA256
@@ -49,7 +52,12 @@ if ($hash2 -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78
   Expand-Archive .\RavenMCN.zip -Force
   #运行
   & .\RavenMCN\RavenM一键安装工具.exe 
-  pause
+  Read-Host -prompt " "
+  Read-Host -prompt " "
 }
-else { Out-String -InputObject "安装文件校验不通过，请反馈给社区管理" pause}
-
+else 
+{ 
+  Out-String -InputObject "安装文件校验不通过，请反馈给社区管理"
+  Read-Host -prompt " " 
+  Read-Host -prompt " "
+}
