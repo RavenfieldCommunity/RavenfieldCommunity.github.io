@@ -1,9 +1,9 @@
-#RavenMCNå®‰è£…è„šæœ¬
+#RavenMCN°²×°½Å±¾
 
-Out-String -InputObject "# RavenMå›½å†…ç‰ˆå®‰è£…è„šæœ¬
-# ç”±RavenfieldCommunityç»´æŠ¤"
+Out-String -InputObject "# RavenM¹úÄÚ°æ°²×°½Å±¾
+# ÓÉRavenfieldCommunityÎ¬»¤"
 
-#åˆ›å»ºsessionå¹¶ä½¿ç”¨ç›´é“¾apiè¯·æ±‚æ–‡ä»¶
+#´´½¨session²¢Ê¹ÓÃÖ±Á´apiÇëÇóÎÄ¼ş
 Try {
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
@@ -33,23 +33,23 @@ Try {
 }
 Catch 
 { 
-  Out-String -InputObject "å®‰è£…æ–‡ä»¶ä¸‹è½½å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œæˆ–åé¦ˆç»™ç¤¾åŒºç®¡ç†" pause
+  Out-String -InputObject "°²×°ÎÄ¼şÏÂÔØÊ§°Ü£¬Çë¼ì²éÍøÂç»ò·´À¡¸øÉçÇø¹ÜÀí" pause
   exit 1 
 }
-Finally { Out-String -InputObject "å®‰è£…æ–‡ä»¶ä¸‹è½½æˆåŠŸ" }
+Finally { Out-String -InputObject "°²×°ÎÄ¼şÏÂÔØ³É¹¦" }
 
-#æ ¡éªŒhash
+#Ğ£Ñéhash
 $hash1 = Get-FileHash .\RavenMCN.zip -Algorithm SHA256
 $hash2 = $hash1.Hash
-Out-String -InputObject "å®‰è£…æ–‡ä»¶Hash: $hash2"
+Out-String -InputObject "°²×°ÎÄ¼şHash: $hash2"
 if ($hash2 -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
 { 
-  #è§£å‹
-  Out-String -InputObject "æ­£åœ¨å¯åŠ¨æ–‡ä»¶..."
+  #½âÑ¹
+  Out-String -InputObject "ÕıÔÚÆô¶¯ÎÄ¼ş..."
   Expand-Archive .\RavenMCN.zip -Force
-  #è¿è¡Œ
-  & .\RavenMCN\RavenMä¸€é”®å®‰è£…å·¥å…·.exe 
+  #ÔËĞĞ
+  & .\RavenMCN\RavenMÒ»¼ü°²×°¹¤¾ß.exe 
   pause
 }
-else { Out-String -InputObject "å®‰è£…æ–‡ä»¶æ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆç»™ç¤¾åŒºç®¡ç†" pause}
+else { Out-String -InputObject "°²×°ÎÄ¼şĞ£Ñé²»Í¨¹ı£¬Çë·´À¡¸øÉçÇø¹ÜÀí" pause}
 
