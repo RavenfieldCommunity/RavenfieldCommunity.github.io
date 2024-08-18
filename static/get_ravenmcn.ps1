@@ -1,5 +1,4 @@
 #RavenMCN安装脚本
-#Timer部分使用Gemini辅助编写
 
 Write-Host "# RavenM插件国内版 安装脚本
 # RavenM国内版 由 Ravenfield贴吧 维护
@@ -95,6 +94,7 @@ function CheckAndRunLocal-RavenMCN {
     #运行   
     if ($_ -eq $null) { Start-Process $exePath } else { return $false }
     Write-Host "提示：运行安装文件不需要管理员权限"
+    $result_ = Read-Host -Prompt "请等待安装工具出现时再关闭本窗口"
     return $true
   }
   else 
