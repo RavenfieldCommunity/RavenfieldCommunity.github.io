@@ -1,29 +1,28 @@
 #RavenMCN安装脚本
+#Timer部分使用Gemini辅助编写
 
-Write-Host "# RavenM国内版安装脚本
-# RavenM国内版由 Ravenfield贴吧 维护
-# 安装脚本由 Github@RavenfieldCommunity 维护
+Write-Host "# RavenM插件国内版 安装脚本
+# RavenM国内版 由 Ravenfield贴吧 维护
+# 安装脚本 由 Github@RavenfieldCommunity 维护
+# 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
+
+#提示：在已安装插件的情况下重新安装插件 => 等价于更新
+#提示：本地的安装文件会自动从服务器获取新的插件
 "
 
 #定义变量
-$isOldFileExist = $false
-
 #获取本地路径
-$envVar = Get-ChildItem Env:appdata
-$path = $envVar.Value
-$folderPath = $path + "\RavenMCN"
-$zipPath = $folderPath + "\RavenMCN.zip"
-$exePath = $folderPath + "\RavenM一键安装工具.exe"
+$path = (Get-ChildItem Env:appdata).Value
+$folderPath = "$path\RavenMCN"
+$zipPath = "$folderPath\RavenMCN.zip"
+$tempPath = "$folderPath\Temp.zip"
+$exePath = "$folderPath\RavenM一键安装工具.exe"
 
-$isPathExist = Test-Path -Path $folderPath
-if ($isPathExist -eq $true) {}
+if ( (Test-Path -Path $folderPath) -eq $true) {}
 else {$result_ = mkdir $folderPath}
 
-$isOldFileExist = Test-Path -Path $zipPath
-
 #打印下载目录
-$tipText = "下载目录：" + $folderPath
-Write-Host $tipText
+Write-Host "下载目录：$folderPath"
 
 #定义函数
 function Download-RavenMCN {
@@ -35,7 +34,7 @@ function Download-RavenMCN {
   $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down" `
     -WebSession $session `
-    -OutFile $zipPath `
+    -OutFile $tempPath `
     -Headers @{
       "authority"="api.leafone.cn"
       "method"="GET"
@@ -54,60 +53,98 @@ function Download-RavenMCN {
       "sec-fetch-user"="?1"
       "upgrade-insecure-requests"="1"
     }
-    if ($_ -eq $null) {} else { Write-Warning $_ }
+    $error_ = $_
+    if ($error_ -eq $null)
+    {
+      if ( CheckAndApplyTemp-RavenMCN ) { return $true }
+      else { retrun $false }
+    }
+    else
+    {
+      retrun $false
+    }
+    
 }
 
-function CheckAndRun-RavenMCN {
+function CheckAndApplyTemp-RavenMCN {
   #校验hash
-  $hash1 = Get-FileHash $zipPath -Algorithm SHA256
-  $hash2 = $hash1.Hash
-  Write-Host "安装文件Hash: $hash2"
-  if ($hash2 -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
+  $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
+  Write-Host "下载的安装文件的Hash: $hash"
+  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
   { 
-    Run-RavenMCN
+    Copy-Item -Path $tempPath -Destination $zipPath
+    if ($_ -eq $null) { return $true }
+    else { return $false }
+  }
+  else 
+  { 
+    Write-Host "下载的安装文件校验不通过，请反馈给社区管理或重新下载"
+    return $false
+  }
+}
+
+function CheckAndRunLocal-RavenMCN {
+  #校验hash
+  $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
+  Write-Host "安装文件Hash: $hash"
+  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
+  { 
+    #解压
+    Write-Host "正在启动文件..."
+    Expand-Archive $zipPath -DestinationPath $folderPath -Force
+    #运行   
+    if ($_ -eq $null) { Start-Process $exePath } else { return $false }
+    Write-Host "提示：运行安装文件不需要管理员权限"
+    return $true
   }
   else 
   { 
     Write-Host "安装文件校验不通过，请反馈给社区管理或重新下载"
-    Read-Host -prompt "您现在可以关闭窗口了" 
+    UpdateLocal-RavenMCN
+    return $false
   }
 }
 
-function Run-RavenMCN {
-  #解压
-  Write-Host "正在启动文件..."
-  Expand-Archive $zipPath -DestinationPath $folderPath -Force
-  #运行   
-  Start-Process $exePath
-  Write-Host "注意，运行安装文件不需要管理员权限"
-  Read-Host -prompt "请手动安装完RavenM后再关闭本窗口"
-  Read-Host -prompt "请手动安装完RavenM后再关闭本窗口"
+function UpdateLocal-RavenMCN {
+  Write-Host "重新下载安装文件，下次启动时生效..."
+  Download-RavenMCN
 }
 
 function MainGet-RavenMCN {
-  Download-RavenMCN
-  $result_ = Test-Path -Path $zipPath
-  if ($result_ -eq $true)
+  if (Download-RavenMCN -eq $true)
   {
-    CheckAndRun-RavenMCN
+    Write-Host "安装文件下载并应用成功"
+    $result_ = CheckAndRunLocal-RavenMCN
   }
   else
   {
-    Write-Host "安装文件下载失败，请检查网络或反馈给社区管理"
-    Read-Host -prompt "您现在可以关闭窗口了"
+    Write-Host "安装文件下载或应用失败，请检查网络或反馈给社区管理"
   }
 }
 
+function Exit-IScript
+{
+  $result_ = Read-Host "您现在可以关闭窗口了"
+}
 
 #主代码
-if ($isOldFileExist -eq $true)
+if ( (Test-Path -Path $zipPath) -eq $true)
 {
   Write-Host "本地存在安装文件，是否直接运行？" 
-  $yesRun = Read-Host -Prompt "是请输入'1'并回车，其他任意键并回车则重新下载安装文件"
-  if ($yesRun  -eq "1")
+  $yesRun = Read-Host -Prompt "按 回车键 则直接运行本地安装文件，按 任意键并回车 则重新下载>"
+  if ($yesRun  -eq "")
   {
-    CheckAndRun-RavenMCN
+    $result_ = CheckAndRunLocal-RavenMCN
+    Exit-IScript
   }
-  else { MainGet-RavenMCN }
+  else
+  {
+    MainGet-RavenMCN
+    Exit-IScript
+  }
 }
-else { MainGet-RavenMCN }
+else
+{ 
+  MainGet-RavenMCN
+  Exit-IScript
+}
