@@ -1,217 +1,10 @@
 #社区多语言 简中 安装脚本
+#感谢: BartJolling/ps-steam-cmd
+#感谢: api.leafone.cn
 
-$vdf = [VdfDeserializer]::new()
-$steamPath = ""
-
-Write-Host "# 社区多语言 简体中文 安装脚本
-# 安装脚本 由 Github@RavenfieldCommunity 维护
-# 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
-
-#提示：在已安装插件的情况下重新安装插件 => 等价于更新
-"
-
-$steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\')
-if ($_ -eq $null)
-{
-  Write-Host "Steam安装路径：$steamInstallPath"
-  Analyic-LibFolder
-}
-else
-{
-  Write-Host "找不到Steam"
-}
-
-function Analyic-LibFolder {
-  if ( (Test-Path -Path "E:\program\steam\steamapps\libraryfolders.vdf") -eq $true )
-  {
-    return $vdf.Deserialize( "$(Get-Content("E:\Program\Steam\steamapps\libraryfolders.vdf"))" );
-  }
-}
-
-function Exit-IScpipt {
-  
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#定义变量
-#获取本地路径
-$path = (Get-ChildItem Env:appdata).Value
-$folderPath = "$path\RavenMCN"
-$zipPath = "$folderPath\RavenMCN.zip"
-$tempPath = "$folderPath\Temp.zip"
-$exePath = "$folderPath\RavenM一键安装工具.exe"
-
-if ( (Test-Path -Path $folderPath) -eq $true) {}
-else {$result_ = mkdir $folderPath}
-
-#打印下载目录
-#Write-Host "下载目录：$folderPath"
-
-#定义函数
-function Download-RavenMCN {
-  Write-Host "正在下载文件..." 
-  #创建session并使用直链api请求文件
-  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-  $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-  $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down" `
-    -WebSession $session `
-    -OutFile $tempPath `
-    -Headers @{
-      "authority"="api.leafone.cn"
-      "method"="GET"
-      "path"="/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down"
-      "scheme"="https"
-      "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-      "accept-encoding"="gzip, deflate, br, zstd"
-      "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-      "priority"="u=0, i"
-      "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
-      "sec-ch-ua-mobile"="?0"
-      "sec-ch-ua-platform"="`"Windows`""
-      "sec-fetch-dest"="document"
-      "sec-fetch-mode"="navigate"
-      "sec-fetch-site"="none"
-      "sec-fetch-user"="?1"
-      "upgrade-insecure-requests"="1"
-    }
-    $error_ = $_
-    if ($error_ -eq $null)
-    {
-      if ( CheckAndApplyTemp-RavenMCN ) { return $true }
-      else { retrun $false }
-    }
-    else
-    {
-      retrun $false
-    }
-    
-}
-
-function CheckAndApplyTemp-RavenMCN {
-  #校验hash
-  $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
-  Write-Host "下载的安装文件的Hash: $hash"
-  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
-  { 
-    Copy-Item -Path $tempPath -Destination $zipPath
-    if ($_ -eq $null) { return $true }
-    else { return $false }
-  }
-  else 
-  { 
-    Write-Host "下载的安装文件校验不通过，请反馈给社区管理或重新下载"
-    return $false
-  }
-}
-
-function CheckAndRunLocal-RavenMCN {
-  #校验hash
-  $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
-  Write-Host "安装文件Hash: $hash"
-  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
-  { 
-    #解压
-    Write-Host "正在启动文件..."
-    Expand-Archive $zipPath -DestinationPath $folderPath -Force
-    #运行   
-    if ($_ -eq $null) { Start-Process $exePath } else { return $false }
-    Write-Host "提示：运行安装文件不需要管理员权限"
-    $result_ = Read-Host -Prompt "请等待安装工具出现时再关闭本窗口"
-    return $true
-  }
-  else 
-  { 
-    Write-Host "安装文件校验不通过，请反馈给社区管理或重新下载"
-    UpdateLocal-RavenMCN
-    return $false
-  }
-}
-
-function UpdateLocal-RavenMCN {
-  Write-Host "重新下载安装文件，下次启动时生效..."
-  Download-RavenMCN
-}
-
-function MainGet-RavenMCN {
-  if (Download-RavenMCN -eq $true)
-  {
-    Write-Host "安装文件下载并应用成功"
-    $result_ = CheckAndRunLocal-RavenMCN
-  }
-  else
-  {
-    Write-Host "安装文件下载或应用失败，请检查网络或反馈给社区管理"
-  }
-}
-
-function Exit-IScript
-{
-  $result_ = Read-Host "您现在可以关闭窗口了"
-}
-
-#主代码
-if ( (Test-Path -Path $zipPath) -eq $false)
-{
-  Write-Host "本地存在安装文件，是否直接运行？" 
-  $yesRun = Read-Host -Prompt "按 回车键 则直接运行本地安装文件，按 任意键并回车 则重新下载>"
-  if ($yesRun  -eq "")
-  {
-    $result_ = CheckAndRunLocal-RavenMCN
-    Exit-IScript
-  }
-  else
-  {
-    MainGet-RavenMCN
-    Exit-IScript
-  }
-}
-elseif ($false)
-{ 
-  MainGet-RavenMCN
-  Exit-IScript
-}
-
-
-
-
-###start of module
+###module: VdfDeserializer 
+##src: https://github.com/BartJolling/ps-steam-cmd
+###start module
 Enum State
 {
     Start = 0
@@ -221,7 +14,6 @@ Enum State
     Finished = 4
     Closed = 5
 };
-
 Class VdfDeserializer
 {
     [PSCustomObject] Deserialize([string]$vdfContent)
@@ -313,7 +105,6 @@ Class VdfDeserializer
         return $result;
     }     
 }
-
 Class VdfTextReader
 {
     [string]$Value;
@@ -502,5 +293,286 @@ Class VdfTextReader
         return ($this._charsLen -ne 0);
     }
 }
+###end module
 
-###end of module
+
+#初始化变量
+$vdf = [VdfDeserializer]::new()  #初始化VDF解析器
+#获取Steam安装路径
+$global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\')
+$errorWhenGetPath_ = $?  #保存错误
+#仅需要再次读写的变量才加上Global标志
+$global:gameLibPath = "" #游戏安装的steam库的位置
+$global:gamePath = ""  #游戏本体位置
+$global:libraryfolders = ""  #文件libraryfolders.vdf的位置
+#获取下载路径
+$appdataPath = (Get-ChildItem Env:appdata).Value
+$downloadPath = "$appdataPath\MLangCN"   
+$BepDownloadPath = "$downloadPath\Bep.zip"   #BepInEX下载到的本地文件
+$ATransDownloadPath = "$downloadPath\ATrans.zip"  #Autotranslator下载到的本地文件
+
+if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #如果下载路径不存在则新建
+
+#获取并解析libraryfolders
+function Get-Libraryfolders {
+  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
+  {
+    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\steamapps\libraryfolders.vdf"))" );
+    if ($? -eq $true)
+    {
+      return $result_.libraryfolders
+    }
+    else  #错误处理
+    {
+      Write-Host "无法获取Libraryfolders"
+      return ""
+    }
+  }
+  else  #错误处理
+  {
+    Write-Host "无法获取Libraryfolders"
+    return ""
+  }
+}
+
+#通过解析的libraryfolders获取游戏安装的库位置
+function Get-GamePath {
+  $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
+  $count = 0..$lowCount
+  foreach ($num in $count)  #手动递归
+  {
+    if ($global:libraryfolders."$num".apps.636480 -ne $null)
+   {
+     return $global:libraryfolders."$num".path.Replace('\\','\')
+   }
+  }
+  #错误处理
+  Write-Host "无法获取游戏安装路径或未安装游戏"  
+  return ""
+}
+
+function DownloadAndApply-BepInEX {
+  if ( (Test-Path -Path "$gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
+  {
+    Write-Host "已经安装BepInEX，跳过"
+    return $true 
+  }
+  else
+  {
+    Write-Host "正在下载BepInEX (5.4.22 for x64)..." 
+    #创建session并使用直链api请求文件
+    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+    $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/iMcD41xbcqgf&type=down" `
+      -WebSession $session `
+      -OutFile $BepDownloadPath `
+      -Headers @{
+        "authority"="api.leafone.cn"
+        "method"="GET"
+        "path"="/api/lanzou?url=https://www.lanzouj.com/iMcD41xbcqgf&type=down"
+        "scheme"="https"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+        "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+        "priority"="u=0, i"
+        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
+        "sec-ch-ua-mobile"="?0"
+        "sec-ch-ua-platform"="`"Windows`""
+        "sec-fetch-dest"="document"
+        "sec-fetch-mode"="navigate"
+        "sec-fetch-site"="none"
+        "sec-fetch-user"="?1"
+        "upgrade-insecure-requests"="1"
+      }
+      if ($? -eq $true)  #无报错就校验并解压
+      {
+        $hash_ = (Get-FileHash $BepDownloadPath -Algorithm SHA256).Hash
+        Write-Host "下载的BepInEX的Hash: $hash_"
+        if ($hash_ -eq "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F") 
+        { 
+          Expand-Archive -Path $BepDownloadPath -DestinationPath $gamePath -Force  #强制覆盖
+          if ($_ -eq $null) {
+            Write-Host "BepInEX已安装"           
+            return $true 
+          }
+          else { #错误处理
+           Write-Host "BepInEX安装失败"
+           return $false 
+          }
+        }
+        else #错误处理
+        { 
+          Write-Host "下载的BepInEX校验不通过，请反馈或重新下载"
+          return $false
+        }
+      }
+      else #错误处理
+      {
+          Write-Host "BepInEX下载失败，请反馈或重新下载"        
+        retrun $false
+      }
+   }
+}
+
+function DownloadAndApply-ATrans {
+  if ( (Test-Path -Path "$gamePath\BepInEx\core\XUnity.Common.dll") -eq $true )
+  {
+    Write-Host "已经安装XUnity.AutoTranslator，跳过"
+    return $true 
+  }
+  else
+  {
+    Write-Host "正在下载XUnity.AutoTranslator (5.3.0)..." 
+    Start-Sleep -Seconds 5  #api只能5s调用一次，下载太快了
+    #创建session并使用直链api请求文件
+    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+    $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/iNKGb1xbf8ze&type=down" `
+      -WebSession $session `
+      -OutFile $ATransDownloadPath `
+      -Headers @{
+        "authority"="api.leafone.cn"
+        "method"="GET"
+        "path"="/api/lanzou?url=https://www.lanzouj.com/iNKGb1xbf8ze&type=down"
+        "scheme"="https"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+        "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+        "priority"="u=0, i"
+        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
+        "sec-ch-ua-mobile"="?0"
+        "sec-ch-ua-platform"="`"Windows`""
+        "sec-fetch-dest"="document"
+        "sec-fetch-mode"="navigate"
+        "sec-fetch-site"="none"
+        "sec-fetch-user"="?1"
+        "upgrade-insecure-requests"="1"
+      }
+      if ($? -eq $true)
+      {
+        $hash_ = (Get-FileHash $ATransDownloadPath -Algorithm SHA256).Hash
+        Write-Host "下载的XUnity.AutoTranslator的Hash: $hash_"
+        if ($hash_ -eq "E9D2C514408833D516533BCC96E64C246140F6A8579A5BC4591697BB8D16DEE3") 
+        { 
+          Expand-Archive -Path $ATransDownloadPath -DestinationPath $gamePath -Force
+          if ($_ -eq $null) {
+            Write-Host "XUnity.AutoTranslator已安装"           
+            return $true 
+          }
+          else {
+           Write-Host "XUnity.AutoTranslator安装失败"
+           return $false 
+          }
+        }
+        else 
+        { 
+          Write-Host "下载的XUnity.AutoTranslator校验不通过，请反馈或重新下载"
+          return $false
+        }
+      }
+      else
+      {
+          Write-Host "XUnity.AutoTranslator下载失败，请反馈或重新下载"        
+        retrun $false
+      }
+   }
+}
+
+function Apply-MLang {
+  #定义文件位置
+  $file1 = "$gameLibPath\steamapps\workshop\content\636480\3237432182\main_extra-sch.txt"
+  $file2 = "$gameLibPath\steamapps\workshop\content\636480\3237432182\main-sch.txt"
+  $targetPath = "$gamePath\BepInEX\Translation\en\Text"
+  if ( (Test-Path -Path $file1) -eq $true ) #如果文件存在
+  {
+    Write-Host "已经订阅翻译文件"
+    if ( (Test-Path -Path $targetPath) -ne $true ) { mkdir $targetPath }  #如果目标目录不存在则新建
+
+    if ($? -eq $true)  #如果目录创建成功
+    {
+      #1
+      Copy-Item -Path $file1 -Destination $targetPath -Force
+      if ($? -ne $true)
+      { 
+        Write-Host "导入翻译文件失败" 
+        return $false
+      }
+
+      #2
+      Copy-Item -Path $file2 -Destination $targetPath -Force
+      if ($? -ne $true)
+      { 
+        Write-Host "导入翻译文件失败" 
+        return $false
+      }
+
+      #无报错就执行到这里
+      Write-Host "导入翻译文件成功" 
+      return $true
+    }
+    else  #错误处理
+    {
+      Write-Host "创建目录失败"      
+    }
+  }
+  else  #错误处理
+  {
+    Write-Host "未订阅翻译文件，请先订阅"
+    return $false
+  }
+}
+
+#退出脚本递归
+function Exit-IScript {
+  Read-Host "您现在可以关闭窗口了"
+  Exit
+  Exit-IScript
+}
+
+
+###主程序
+Write-Host "# 社区多语言 简体中文 安装脚本
+# 安装脚本 由 Github@RavenfieldCommunity 维护
+# 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
+# 参见: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
+
+
+# 提示：在已安装汉化的情况下重新安装汉化 => 等价于更新
+# 当前最新版为 Update 0 
+"
+
+#打印下载目录
+Write-Host "下载目录：$downloadPath"
+
+#如果获取steam安装目录没报错
+if ($errorWhenGetPath_ -eq $true)
+{
+  Write-Host "Steam安装路径：$($global:steamPath)"
+
+  #获取libraryfolders
+  $global:libraryfolders = Get-Libraryfolders
+  if ($global:libraryfolders -eq ""){ Exit-IScript }
+
+  #获取游戏库位置
+  $global:gameLibPath = Get-GamePath
+  if ($global:gameLibPath -eq ""){ Exit-IScript }
+  Write-Host "游戏所在Steam库路径：$($global:gameLibPath)"
+
+  #计算游戏安装位置
+  $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
+  Write-Host "游戏所在安装路径：$($global:gamePath)"
+ 
+  if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #如果失败就exit
+  if ( (DownloadAndApply-ATrans) -ne $true) { Exit-IScript }  #如果失败就exit
+  $result_ = Apply-MLang  #这个就不用判断了
+  Exit-IScript
+}
+else  #错误处理
+{
+  Write-Host "无法获取Steam安装路径"
+  Exit-IScript
+}

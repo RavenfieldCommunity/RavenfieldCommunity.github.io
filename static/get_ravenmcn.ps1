@@ -1,7 +1,9 @@
 #RavenMCN安装脚本
+#感谢: api.leafone.cn
+#感谢: -aya-
 
 Write-Host "# RavenM插件国内版 安装脚本
-# RavenM国内版 由 Ravenfield贴吧 维护
+# RavenM国内版 由 Ravenfield贴吧吧主@Aya 维护
 # 安装脚本 由 Github@RavenfieldCommunity 维护
 # 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
 
