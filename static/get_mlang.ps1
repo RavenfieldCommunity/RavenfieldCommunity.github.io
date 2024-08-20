@@ -496,20 +496,15 @@ function Apply-MLang {
     {
       #1
       Copy-Item -Path $file1 -Destination $targetPath -Force
-      if ($? -ne $true)
-      { 
-        Write-Host "导入翻译文件失败" 
-        return $false
-      }
+      if ($? -ne $true) { Write-Host "导入翻译文件 main_extra-sch 失败" } else { Write-Host "导入翻译文件 main_extra-sch 成功" }
+
 
       #2
       Copy-Item -Path $file2 -Destination $targetPath -Force
-      if ($? -ne $true)
-      { 
-        Write-Host "导入翻译文件失败" 
+      if ($? -ne $true) {
+        Write-Host "导入翻译文件 main-sch 失败" 
         return $false
-      }
-
+      } else  { Write-Host "导入翻译文件 main-sch 成功" }
       #无报错就执行到这里
       Write-Host "导入翻译文件成功" 
       return $true
@@ -521,7 +516,7 @@ function Apply-MLang {
   }
   else  #错误处理
   {
-    Write-Host "未订阅翻译文件，请先订阅"
+    Write-Host "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
     return $false
   }
 }
@@ -539,7 +534,6 @@ Write-Host "# 社区多语言 简体中文 安装脚本
 # 安装脚本 由 Github@RavenfieldCommunity 维护
 # 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
 # 参见: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
-
 
 # 提示：在已安装汉化的情况下重新安装汉化 => 等价于更新
 # 当前最新版为 Update 0 

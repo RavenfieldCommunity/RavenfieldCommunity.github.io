@@ -1,6 +1,4 @@
 #RavenMCN安装脚本
-#感谢: api.leafone.cn
-#感谢: -aya-
 
 Write-Host "# RavenM插件国内版 安装脚本
 # RavenM国内版 由 Ravenfield贴吧吧主@Aya 维护
@@ -19,8 +17,7 @@ $zipPath = "$folderPath\RavenMCN.zip"
 $tempPath = "$folderPath\Temp.zip"
 $exePath = "$folderPath\RavenM一键安装工具.exe"
 
-if ( (Test-Path -Path $folderPath) -eq $true) {}
-else {$result_ = mkdir $folderPath}
+if ( (Test-Path -Path $folderPath)-ne $true) {$result_ = mkdir $folderPath}
 
 #打印下载目录
 Write-Host "下载目录：$folderPath"
@@ -79,7 +76,7 @@ function CheckAndApplyTemp-RavenMCN {
   }
   else 
   { 
-    Write-Host "下载的安装文件校验不通过，请反馈给社区管理或重新下载"
+    Write-Host "下载的安装文件校验不通过，请反馈或重新下载"
     return $false
   }
 }
@@ -101,7 +98,7 @@ function CheckAndRunLocal-RavenMCN {
   }
   else 
   { 
-    Write-Host "安装文件校验不通过，请反馈给社区管理或重新下载"
+    Write-Host "安装文件校验不通过，请反馈或重新下载"
     UpdateLocal-RavenMCN
     return $false
   }
@@ -120,7 +117,7 @@ function MainGet-RavenMCN {
   }
   else
   {
-    Write-Host "安装文件下载或应用失败，请检查网络或反馈给社区管理"
+    Write-Host "安装文件下载或应用失败，请检查网络或反馈"
   }
 }
 
