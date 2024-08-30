@@ -536,7 +536,7 @@ Write-Host "# 社区多语言 简体中文 安装脚本
 # 参见: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
 
 # 提示：在已安装汉化的情况下重新安装汉化 => 等价于更新
-# 当前最新版为 Update 0 
+# 当前最新版为 Update 1 (202408301700)
 "
 
 #打印下载目录
