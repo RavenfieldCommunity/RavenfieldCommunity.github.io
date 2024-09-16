@@ -315,22 +315,22 @@ if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath
 
 #获取并解析libraryfolders
 function Get-Libraryfolders {
-  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
+  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
   {
-    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\steamapps\libraryfolders.vdf"))" );
+    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
     if ($? -eq $true)
     {
       return $result_.libraryfolders
     }
     else  #错误处理
     {
-      Write-Host "无法获取Libraryfolders"
+      Write-Warning "无法获取Libraryfolders"
       return ""
     }
   }
   else  #错误处理
   {
-    Write-Host "无法获取Libraryfolders"
+    Write-Warning "无法获取Libraryfolders"
     return ""
   }
 }
@@ -347,7 +347,7 @@ function Get-GamePath {
    }
   }
   #错误处理
-  Write-Host "无法获取游戏安装路径或未安装游戏"  
+  Write-Warning "无法获取游戏安装路径或未安装游戏"  
   return ""
 }
 
@@ -398,19 +398,19 @@ function DownloadAndApply-BepInEX {
             return $true 
           }
           else { #错误处理
-           Write-Host "BepInEX安装失败"
+           Write-Warning "BepInEX安装失败"
            return $false 
           }
         }
         else #错误处理
         { 
-          Write-Host "下载的BepInEX校验不通过，请反馈或重新下载"
+          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载"
           return $false
         }
       }
       else #错误处理
       {
-          Write-Host "BepInEX下载失败，请反馈或重新下载"        
+          Write-Warning "BepInEX下载失败，请反馈或重新下载"        
         retrun $false
       }
    }
@@ -464,19 +464,19 @@ function DownloadAndApply-ATrans {
             return $true 
           }
           else {
-           Write-Host "XUnity.AutoTranslator安装失败"
+           Write-Warning "XUnity.AutoTranslator安装失败"
            return $false 
           }
         }
         else 
         { 
-          Write-Host "下载的XUnity.AutoTranslator校验不通过，请反馈或重新下载"
+          Write-Warning "下载的XUnity.AutoTranslator校验不通过，请反馈或重新下载"
           return $false
         }
       }
       else
       {
-          Write-Host "XUnity.AutoTranslator下载失败，请反馈或重新下载"        
+          Write-Warning "XUnity.AutoTranslator下载失败，请反馈或重新下载"        
         retrun $false
       }
    }
@@ -496,13 +496,13 @@ function Apply-MLang {
     {
       #1
       Copy-Item -Path $file1 -Destination $targetPath -Force
-      if ($? -ne $true) { Write-Host "导入翻译文件 main_extra-sch 失败" } else { Write-Host "导入翻译文件 main_extra-sch 成功" }
+      if ($? -ne $true) { Write-Warning "导入翻译文件 main_extra-sch 失败" } else { Write-Host "导入翻译文件 main_extra-sch 成功" }
 
 
       #2
       Copy-Item -Path $file2 -Destination $targetPath -Force
       if ($? -ne $true) {
-        Write-Host "导入翻译文件 main-sch 失败" 
+        Write-Warning "导入翻译文件 main-sch 失败" 
         return $false
       } else  { Write-Host "导入翻译文件 main-sch 成功" }
       #无报错就执行到这里
@@ -511,12 +511,12 @@ function Apply-MLang {
     }
     else  #错误处理
     {
-      Write-Host "创建目录失败"      
+      Write-Warning "创建目录失败"      
     }
   }
   else  #错误处理
   {
-    Write-Host "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
+    Write-Warning "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
     return $false
   }
 }
@@ -536,6 +536,7 @@ Write-Host "# 社区多语言 简体中文 安装脚本
 # 参见: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
 
 # 提示：在已安装汉化的情况下重新安装汉化 => 等价于更新
+# 提示：任何Bug可在Steam评论区或百度贴吧、RavenfieldCommunity提出
 # 当前最新版为 Update 1 (202408301700)
 "
 
