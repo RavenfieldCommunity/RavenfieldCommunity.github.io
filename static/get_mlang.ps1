@@ -425,7 +425,7 @@ function DownloadAndApply-ATrans {
   else
   {
     Write-Host "正在下载XUnity.AutoTranslator (5.3.0)..." 
-    Start-Sleep -Seconds 5  #api只能5s调用一次，下载太快了
+    Start-Sleep -Seconds 10  #api只能5s调用一次，下载太快了
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
