@@ -1,6 +1,6 @@
-#RF BepInEXå¸è½½å·¥å…·
-#æ„Ÿè°¢: BartJolling/ps-steam-cmd
-#æ„Ÿè°¢: api.leafone.cn
+#RF BepInEXĞ¶ÔØ¹¤¾ß
+#¸ĞĞ»: BartJolling/ps-steam-cmd
+#¸ĞĞ»: api.leafone.cn
 
 ###module: VdfDeserializer 
 ##src: https://github.com/BartJolling/ps-steam-cmd
@@ -296,116 +296,116 @@ Class VdfTextReader
 ###end module
 
 
-#åˆå§‹åŒ–å˜é‡
-$vdf = [VdfDeserializer]::new()  #åˆå§‹åŒ–VDFè§£æå™¨
-#è·å–Steamå®‰è£…è·¯å¾„
+#³õÊ¼»¯±äÁ¿
+$vdf = [VdfDeserializer]::new()  #³õÊ¼»¯VDF½âÎöÆ÷
+#»ñÈ¡Steam°²×°Â·¾¶
 $global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\')
-$errorWhenGetPath_ = $?  #ä¿å­˜é”™è¯¯
-#ä»…éœ€è¦å†æ¬¡è¯»å†™çš„å˜é‡æ‰åŠ ä¸ŠGlobalæ ‡å¿—
-$global:gameLibPath = "" #æ¸¸æˆå®‰è£…çš„steamåº“çš„ä½ç½®
-$global:gamePath = ""  #æ¸¸æˆæœ¬ä½“ä½ç½®
-$global:libraryfolders = ""  #æ–‡ä»¶libraryfolders.vdfçš„ä½ç½®
+$errorWhenGetPath_ = $?  #±£´æ´íÎó
+#½öĞèÒªÔÙ´Î¶ÁĞ´µÄ±äÁ¿²Å¼ÓÉÏGlobal±êÖ¾
+$global:gameLibPath = "" #ÓÎÏ·°²×°µÄsteam¿âµÄÎ»ÖÃ
+$global:gamePath = ""  #ÓÎÏ·±¾ÌåÎ»ÖÃ
+$global:libraryfolders = ""  #ÎÄ¼şlibraryfolders.vdfµÄÎ»ÖÃ
 
-#è·å–å¹¶è§£ælibraryfolders
+#»ñÈ¡²¢½âÎölibraryfolders
 function Get-Libraryfolders {
-  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #å¦‚æœå­˜åœ¨å°±è·å–å¹¶è§£æ
+  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #Èç¹û´æÔÚ¾Í»ñÈ¡²¢½âÎö
   {
     $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
     if ($? -eq $true)
     {
       return $result_.libraryfolders
     }
-    else  #é”™è¯¯å¤„ç†
+    else  #´íÎó´¦Àí
     {
-      Write-Warning "æ— æ³•è·å–Libraryfolders"
+      Write-Warning "ÎŞ·¨»ñÈ¡Libraryfolders"
       return ""
     }
   }
-  else  #é”™è¯¯å¤„ç†
+  else  #´íÎó´¦Àí
   {
-    Write-Warning "æ— æ³•è·å–Libraryfolders"
+    Write-Warning "ÎŞ·¨»ñÈ¡Libraryfolders"
     return ""
   }
 }
 
-#é€šè¿‡è§£æçš„libraryfoldersè·å–æ¸¸æˆå®‰è£…çš„åº“ä½ç½®
+#Í¨¹ı½âÎöµÄlibraryfolders»ñÈ¡ÓÎÏ·°²×°µÄ¿âÎ»ÖÃ
 function Get-GamePath {
   $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
   $count = 0..$lowCount
-  foreach ($num in $count)  #æ‰‹åŠ¨é€’å½’
+  foreach ($num in $count)  #ÊÖ¶¯µİ¹é
   {
     if ($global:libraryfolders."$num".apps.636480 -ne $null)
    {
      return $global:libraryfolders."$num".path.Replace('\\','\')
    }
   }
-  #é”™è¯¯å¤„ç†
-  Write-Warning "æ— æ³•è·å–æ¸¸æˆå®‰è£…è·¯å¾„æˆ–æœªå®‰è£…æ¸¸æˆ"  
+  #´íÎó´¦Àí
+  Write-Warning "ÎŞ·¨»ñÈ¡ÓÎÏ·°²×°Â·¾¶»òÎ´°²×°ÓÎÏ·"  
   return ""
 }
 
 
 function Apply-Action {
-  #å®šä¹‰æ–‡ä»¶ä½ç½®
+  #¶¨ÒåÎÄ¼şÎ»ÖÃ
   $file1 = "$gamePath\BepInEX"
   $file2 = "$gamePath\winhttp.dll"
   $file3 = "$gamePath\doorstop_config.ini"
-  if ( (Test-Path -Path $file2) -eq $true ) #å¦‚æœæ–‡ä»¶å­˜åœ¨
+  if ( (Test-Path -Path $file2) -eq $true ) #Èç¹ûÎÄ¼ş´æÔÚ
   {
-    Write-Host "åˆ é™¤BepInEXæ–‡ä»¶å¤¹ (1/3)..."
+    Write-Host "É¾³ıBepInEXÎÄ¼ş¼Ğ (1/3)..."
 	rm $file1 -Recurse
-	Write-Host "åˆ é™¤winhttp.dll (2/3)..."
+	Write-Host "É¾³ıwinhttp.dll (2/3)..."
 	rm $file2
-	Write-Host "åˆ é™¤doorstop_config.ini (3/3)..."
+	Write-Host "É¾³ıdoorstop_config.ini (3/3)..."
 	rm $file3
   }
-  else  #é”™è¯¯å¤„ç†
+  else  #´íÎó´¦Àí
   {
-    Write-Warning "æœªå®‰è£…BepInEX"
+    Write-Warning "Î´°²×°BepInEX"
     return $false
   }
 }
 
-#é€€å‡ºè„šæœ¬é€’å½’
+#ÍË³ö½Å±¾µİ¹é
 function Exit-IScript {
-  Read-Host "æ‚¨ç°åœ¨å¯ä»¥å…³é—­çª—å£äº†"
+  Read-Host "ÄúÏÖÔÚ¿ÉÒÔ¹Ø±Õ´°¿ÚÁË"
   Exit
   Exit-IScript
 }	
 
 
-###ä¸»ç¨‹åº
-Write-Host "# RF BepInEXæ’ä»¶å®Œå…¨ å¸è½½è„šæœ¬
-# å®‰è£…è„šæœ¬ ç”± Github@RavenfieldCommunity ç»´æŠ¤
-# å‚è§: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
-# å‚è§: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
+###Ö÷³ÌĞò
+Write-Host "# RF BepInEX²å¼şÍêÈ« Ğ¶ÔØ½Å±¾
+# °²×°½Å±¾ ÓÉ Github@RavenfieldCommunity Î¬»¤
+# ²Î¼û: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
+# ²Î¼û: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
 
-# æç¤ºï¼šæ­¤è„šæœ¬ä¼šåˆ é™¤æ‰€æœ‰åŸºäºBepInEXçš„RFæ¸¸æˆæ’ä»¶BepInEXæ¡†æ¶æœ¬ä½“ï¼ŒåŒ…æ‹¬ç¤¾åŒºå¤šè¯­è¨€å’ŒRavenMï¼
-# æç¤ºï¼šæŠ¥é”™è¯·åé¦ˆï¼
+# ÌáÊ¾£º´Ë½Å±¾»áÉ¾³ıËùÓĞ»ùÓÚBepInEXµÄRFÓÎÏ·²å¼şBepInEX¿ò¼Ü±¾Ìå£¬°üÀ¨ÉçÇø¶àÓïÑÔºÍRavenM£¡
+# ÌáÊ¾£º±¨´íÇë·´À¡£¡
 "
 
-Write-Host "Steamå®‰è£…è·¯å¾„ï¼š$($global:steamPath)"
+Write-Host "Steam°²×°Â·¾¶£º$($global:steamPath)"
 
-  #è·å–libraryfolders
+  #»ñÈ¡libraryfolders
   $global:libraryfolders = Get-Libraryfolders
   if ($global:libraryfolders -eq ""){ Exit-IScript }
 
-  #è·å–æ¸¸æˆåº“ä½ç½®
+  #»ñÈ¡ÓÎÏ·¿âÎ»ÖÃ
   $global:gameLibPath = Get-GamePath
   if ($global:gameLibPath -eq ""){ Exit-IScript }
-  Write-Host "æ¸¸æˆæ‰€åœ¨Steamåº“è·¯å¾„ï¼š$($global:gameLibPath)"
+  Write-Host "ÓÎÏ·ËùÔÚSteam¿âÂ·¾¶£º$($global:gameLibPath)"
 
-  #è®¡ç®—æ¸¸æˆå®‰è£…ä½ç½®
+  #¼ÆËãÓÎÏ·°²×°Î»ÖÃ
   $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
-  Write-Host "æ¸¸æˆæ‰€åœ¨å®‰è£…è·¯å¾„ï¼š$($global:gamePath)"
+  Write-Host "ÓÎÏ·ËùÔÚ°²×°Â·¾¶£º$($global:gamePath)"
   Write-Host ""
 
-#å¦‚æœè·å–steamå®‰è£…ç›®å½•æ²¡æŠ¥é”™
+#Èç¹û»ñÈ¡steam°²×°Ä¿Â¼Ã»±¨´í
 if ($errorWhenGetPath_ -eq $true)
 {
 	
-  Write-Host "æ˜¯å¦åˆ é™¤æ‰€æœ‰åŸºäºBepInEXçš„RFæ¸¸æˆæ’ä»¶ä¸BepInEXæœ¬ä½“ï¼ˆåŒ…æ‹¬ç¤¾åŒºå¤šè¯­è¨€å’ŒRavenMï¼‰ï¼Ÿ" 
-    $yesRun = Read-Host -Prompt "æŒ‰ å›è½¦é”® åˆ™å–æ¶ˆæ‰§è¡Œï¼ŒæŒ‰ æ•°å­—1 å¹¶å›è½¦ æ‰§è¡Œæ“ä½œ>"
+  Write-Host "ÊÇ·ñÉ¾³ıËùÓĞ»ùÓÚBepInEXµÄRFÓÎÏ·²å¼şÓëBepInEX±¾Ìå£¨°üÀ¨ÉçÇø¶àÓïÑÔºÍRavenM£©£¿" 
+    $yesRun = Read-Host -Prompt "°´ »Ø³µ¼ü ÔòÈ¡ÏûÖ´ĞĞ£¬°´ Êı×Ö1 ²¢»Ø³µ Ö´ĞĞ²Ù×÷>"
     if ($yesRun  -eq "1")
     {
       Apply-Action
@@ -417,8 +417,8 @@ if ($errorWhenGetPath_ -eq $true)
     }
   Exit-IScript
 }
-else  #é”™è¯¯å¤„ç†
+else  #´íÎó´¦Àí
 {
-  Write-Host "æ— æ³•è·å–Steamå®‰è£…è·¯å¾„"
+  Write-Host "ÎŞ·¨»ñÈ¡Steam°²×°Â·¾¶"
   Exit-IScript
 }

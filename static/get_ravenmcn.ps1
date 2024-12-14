@@ -1,32 +1,32 @@
-#RavenMCNå®‰è£…è„šæœ¬
+#RavenMCN°²×°½Å±¾
 
-Write-Host "# RavenM è”æœºæ’ä»¶å›½å†…ç‰ˆ å®‰è£…æ–‡ä»¶ç‰ˆ å®‰è£…è„šæœ¬
-# RavenMå›½å†…ç‰ˆ ç”± Ravenfieldè´´å§å§ä¸»@Aya ç»´æŠ¤
-# å®‰è£…è„šæœ¬ ç”± Github@RavenfieldCommunity ç»´æŠ¤
-# å‚è§: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
+Write-Host "# RavenM Áª»ú²å¼þ¹úÄÚ°æ °²×°ÎÄ¼þ°æ °²×°½Å±¾
+# RavenM¹úÄÚ°æ ÓÉ RavenfieldÌù°É°ÉÖ÷@Aya Î¬»¤
+# °²×°½Å±¾ ÓÉ Github@RavenfieldCommunity Î¬»¤
+# ²Î¼û: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
 
-#æç¤ºï¼šåœ¨å·²å®‰è£…æ’ä»¶çš„æƒ…å†µä¸‹é‡æ–°å®‰è£…æ’ä»¶ => ç­‰ä»·äºŽæ›´æ–°
-#æç¤ºï¼šæœ¬åœ°çš„å®‰è£…æ–‡ä»¶ä¼šè‡ªåŠ¨ä»ŽæœåŠ¡å™¨èŽ·å–æ–°çš„æ’ä»¶
-#æç¤ºï¼šå·²çŸ¥Windows Defenderä¼šè¯¯æŠ¥å®‰è£…æ–‡ä»¶ï¼Œå‚è€ƒï¼ˆå®‰è£…åŽè®°å¾—å›žå¤åŽŸæ¥çš„WDè®¾ç½®ï¼Œä¸å»ºè®®ä½¿ç”¨é“¾æŽ¥ä¸­æä¾›çš„å·¥å…·ï¼ï¼‰ï¼šhttps://blog.csdn.net/qq_54780911/article/details/121993809
+#ÌáÊ¾£ºÔÚÒÑ°²×°²å¼þµÄÇé¿öÏÂÖØÐÂ°²×°²å¼þ => µÈ¼ÛÓÚ¸üÐÂ
+#ÌáÊ¾£º±¾µØµÄ°²×°ÎÄ¼þ»á×Ô¶¯´Ó·þÎñÆ÷»ñÈ¡ÐÂµÄ²å¼þ
+#ÌáÊ¾£ºÒÑÖªWindows Defender»áÎó±¨°²×°ÎÄ¼þ£¬²Î¿¼£¨°²×°ºó¼ÇµÃ»Ø¸´Ô­À´µÄWDÉèÖÃ£¬²»½¨ÒéÊ¹ÓÃÁ´½ÓÖÐÌá¹©µÄ¹¤¾ß£¡£©£ºhttps://blog.csdn.net/qq_54780911/article/details/121993809
 "
 
-#å®šä¹‰å˜é‡
-#èŽ·å–æœ¬åœ°è·¯å¾„
+#¶¨Òå±äÁ¿
+#»ñÈ¡±¾µØÂ·¾¶
 $path = (Get-ChildItem Env:appdata).Value
 $folderPath = "$path\RavenMCN"
 $zipPath = "$folderPath\RavenMCN.zip"
 $tempPath = "$folderPath\Temp.zip"
-$exePath = "$folderPath\RavenMä¸€é”®å®‰è£…å·¥å…·.exe"
+$exePath = "$folderPath\RavenMÒ»¼ü°²×°¹¤¾ß.exe"
 
 if ( (Test-Path -Path $folderPath)-ne $true) {$result_ = mkdir $folderPath}
 
-#æ‰“å°ä¸‹è½½ç›®å½•
-Write-Host "ä¸‹è½½ç›®å½•ï¼š$folderPath"
+#´òÓ¡ÏÂÔØÄ¿Â¼
+Write-Host "ÏÂÔØÄ¿Â¼£º$folderPath"
 
-#å®šä¹‰å‡½æ•°
+#¶¨Òåº¯Êý
 function Download-RavenMCN {
-  Write-Host "æ­£åœ¨ä¸‹è½½æ–‡ä»¶..." 
-  #åˆ›å»ºsessionå¹¶ä½¿ç”¨ç›´é“¾apiè¯·æ±‚æ–‡ä»¶
+  Write-Host "ÕýÔÚÏÂÔØÎÄ¼þ..." 
+  #´´½¨session²¢Ê¹ÓÃÖ±Á´apiÇëÇóÎÄ¼þ
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
@@ -66,9 +66,9 @@ function Download-RavenMCN {
 }
 
 function CheckAndApplyTemp-RavenMCN {
-  #æ ¡éªŒhash
+  #Ð£Ñéhash
   $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
-  Write-Host "ä¸‹è½½çš„å®‰è£…æ–‡ä»¶çš„Hash: $hash"
+  Write-Host "ÏÂÔØµÄ°²×°ÎÄ¼þµÄHash: $hash"
   if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
   { 
     Copy-Item -Path $tempPath -Destination $zipPath
@@ -77,61 +77,61 @@ function CheckAndApplyTemp-RavenMCN {
   }
   else 
   { 
-    Write-Host "ä¸‹è½½çš„å®‰è£…æ–‡ä»¶æ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"
+    Write-Host "ÏÂÔØµÄ°²×°ÎÄ¼þÐ£Ñé²»Í¨¹ý£¬Çë·´À¡»òÖØÐÂÏÂÔØ"
     return $false
   }
 }
 
 function CheckAndRunLocal-RavenMCN {
-  #æ ¡éªŒhash
+  #Ð£Ñéhash
   $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
-  Write-Host "å®‰è£…æ–‡ä»¶Hash: $hash"
+  Write-Host "°²×°ÎÄ¼þHash: $hash"
   if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
   { 
-    #è§£åŽ‹
-    Write-Host "æ­£åœ¨å¯åŠ¨æ–‡ä»¶..."
+    #½âÑ¹
+    Write-Host "ÕýÔÚÆô¶¯ÎÄ¼þ..."
     Expand-Archive $zipPath -DestinationPath $folderPath -Force
-    #è¿è¡Œ   
+    #ÔËÐÐ   
     if ($_ -eq $null) { Start-Process $exePath } else { return $false }
-    Write-Host "æç¤ºï¼šè¿è¡Œå®‰è£…æ–‡ä»¶ä¸éœ€è¦ç®¡ç†å‘˜æƒé™"
-    $result_ = Read-Host -Prompt "è¯·ç­‰å¾…å®‰è£…å·¥å…·å‡ºçŽ°æ—¶å†å…³é—­æœ¬çª—å£"
+    Write-Host "ÌáÊ¾£ºÔËÐÐ°²×°ÎÄ¼þ²»ÐèÒª¹ÜÀíÔ±È¨ÏÞ"
+    $result_ = Read-Host -Prompt "ÇëµÈ´ý°²×°¹¤¾ß³öÏÖÊ±ÔÙ¹Ø±Õ±¾´°¿Ú"
     return $true
   }
   else 
   { 
-    Write-Host "å®‰è£…æ–‡ä»¶æ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"
+    Write-Host "°²×°ÎÄ¼þÐ£Ñé²»Í¨¹ý£¬Çë·´À¡»òÖØÐÂÏÂÔØ"
     UpdateLocal-RavenMCN
     return $false
   }
 }
 
 function UpdateLocal-RavenMCN {
-  Write-Host "é‡æ–°ä¸‹è½½å®‰è£…æ–‡ä»¶ï¼Œä¸‹æ¬¡å¯åŠ¨æ—¶ç”Ÿæ•ˆ..."
+  Write-Host "ÖØÐÂÏÂÔØ°²×°ÎÄ¼þ£¬ÏÂ´ÎÆô¶¯Ê±ÉúÐ§..."
   Download-RavenMCN
 }
 
 function MainGet-RavenMCN {
   if (Download-RavenMCN -eq $true)
   {
-    Write-Host "å®‰è£…æ–‡ä»¶ä¸‹è½½å¹¶åº”ç”¨æˆåŠŸ"
+    Write-Host "°²×°ÎÄ¼þÏÂÔØ²¢Ó¦ÓÃ³É¹¦"
     $result_ = CheckAndRunLocal-RavenMCN
   }
   else
   {
-    Write-Host "å®‰è£…æ–‡ä»¶ä¸‹è½½æˆ–åº”ç”¨å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œæˆ–åé¦ˆ"
+    Write-Host "°²×°ÎÄ¼þÏÂÔØ»òÓ¦ÓÃÊ§°Ü£¬Çë¼ì²éÍøÂç»ò·´À¡"
   }
 }
 
 function Exit-IScript
 {
-  $result_ = Read-Host "æ‚¨çŽ°åœ¨å¯ä»¥å…³é—­çª—å£äº†"
+  $result_ = Read-Host "ÄúÏÖÔÚ¿ÉÒÔ¹Ø±Õ´°¿ÚÁË"
 }
 
-#ä¸»ä»£ç 
+#Ö÷´úÂë
 if ( (Test-Path -Path $zipPath) -eq $true)
 {
-  Write-Host "æœ¬åœ°å­˜åœ¨å®‰è£…æ–‡ä»¶ï¼Œæ˜¯å¦ç›´æŽ¥è¿è¡Œï¼Ÿ" 
-  $yesRun = Read-Host -Prompt "æŒ‰ å›žè½¦é”® åˆ™ç›´æŽ¥è¿è¡Œæœ¬åœ°å®‰è£…æ–‡ä»¶ï¼ŒæŒ‰ ä»»æ„é”®å¹¶å›žè½¦ åˆ™é‡æ–°ä¸‹è½½>"
+  Write-Host "±¾µØ´æÔÚ°²×°ÎÄ¼þ£¬ÊÇ·ñÖ±½ÓÔËÐÐ£¿" 
+  $yesRun = Read-Host -Prompt "°´ »Ø³µ¼ü ÔòÖ±½ÓÔËÐÐ±¾µØ°²×°ÎÄ¼þ£¬°´ ÈÎÒâ¼ü²¢»Ø³µ ÔòÖØÐÂÏÂÔØ>"
   if ($yesRun  -eq "")
   {
     $result_ = CheckAndRunLocal-RavenMCN

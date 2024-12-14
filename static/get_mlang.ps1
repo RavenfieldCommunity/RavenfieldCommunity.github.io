@@ -1,6 +1,6 @@
-#RFç¤¾åŒºå¤šè¯­è¨€ ç®€ä¸­ å®‰è£…è„šæœ¬
-#æ„Ÿè°¢: BartJolling/ps-steam-cmd
-#æ„Ÿè°¢: api.leafone.cn
+#RFÉçÇø¶àÓïÑÔ ¼òÖĞ °²×°½Å±¾
+#¸ĞĞ»: BartJolling/ps-steam-cmd
+#¸ĞĞ»: api.leafone.cn
 
 ###module: VdfDeserializer 
 ##src: https://github.com/BartJolling/ps-steam-cmd
@@ -296,71 +296,71 @@ Class VdfTextReader
 ###end module
 
 
-#åˆå§‹åŒ–å˜é‡
-$vdf = [VdfDeserializer]::new()  #åˆå§‹åŒ–VDFè§£æå™¨
-#è·å–Steamå®‰è£…è·¯å¾„
+#³õÊ¼»¯±äÁ¿
+$vdf = [VdfDeserializer]::new()  #³õÊ¼»¯VDF½âÎöÆ÷
+#»ñÈ¡Steam°²×°Â·¾¶
 $global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\')
-$errorWhenGetPath_ = $?  #ä¿å­˜é”™è¯¯
-#ä»…éœ€è¦å†æ¬¡è¯»å†™çš„å˜é‡æ‰åŠ ä¸ŠGlobalæ ‡å¿—
-$global:gameLibPath = "" #æ¸¸æˆå®‰è£…çš„steamåº“çš„ä½ç½®
-$global:gamePath = ""  #æ¸¸æˆæœ¬ä½“ä½ç½®
-$global:libraryfolders = ""  #æ–‡ä»¶libraryfolders.vdfçš„ä½ç½®
-#è·å–ä¸‹è½½è·¯å¾„
+$errorWhenGetPath_ = $?  #±£´æ´íÎó
+#½öĞèÒªÔÙ´Î¶ÁĞ´µÄ±äÁ¿²Å¼ÓÉÏGlobal±êÖ¾
+$global:gameLibPath = "" #ÓÎÏ·°²×°µÄsteam¿âµÄÎ»ÖÃ
+$global:gamePath = ""  #ÓÎÏ·±¾ÌåÎ»ÖÃ
+$global:libraryfolders = ""  #ÎÄ¼şlibraryfolders.vdfµÄÎ»ÖÃ
+#»ñÈ¡ÏÂÔØÂ·¾¶
 $appdataPath = (Get-ChildItem Env:appdata).Value
 $downloadPath = "$appdataPath\MLangCN"   
-$BepDownloadPath = "$downloadPath\Bep.zip"   #BepInEXä¸‹è½½åˆ°çš„æœ¬åœ°æ–‡ä»¶
-$ATransDownloadPath = "$downloadPath\ATrans.zip"  #Autotranslatorä¸‹è½½åˆ°çš„æœ¬åœ°æ–‡ä»¶
+$BepDownloadPath = "$downloadPath\Bep.zip"   #BepInEXÏÂÔØµ½µÄ±¾µØÎÄ¼ş
+$ATransDownloadPath = "$downloadPath\ATrans.zip"  #AutotranslatorÏÂÔØµ½µÄ±¾µØÎÄ¼ş
 
-if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #å¦‚æœä¸‹è½½è·¯å¾„ä¸å­˜åœ¨åˆ™æ–°å»º
+if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #Èç¹ûÏÂÔØÂ·¾¶²»´æÔÚÔòĞÂ½¨
 
-#è·å–å¹¶è§£ælibraryfolders
+#»ñÈ¡²¢½âÎölibraryfolders
 function Get-Libraryfolders {
-  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #å¦‚æœå­˜åœ¨å°±è·å–å¹¶è§£æ
+  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #Èç¹û´æÔÚ¾Í»ñÈ¡²¢½âÎö
   {
     $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
     if ($? -eq $true)
     {
       return $result_.libraryfolders
     }
-    else  #é”™è¯¯å¤„ç†
+    else  #´íÎó´¦Àí
     {
-      Write-Warning "æ— æ³•è·å–Libraryfolders"
+      Write-Warning "ÎŞ·¨»ñÈ¡Libraryfolders"
       return ""
     }
   }
-  else  #é”™è¯¯å¤„ç†
+  else  #´íÎó´¦Àí
   {
-    Write-Warning "æ— æ³•è·å–Libraryfolders"
+    Write-Warning "ÎŞ·¨»ñÈ¡Libraryfolders"
     return ""
   }
 }
 
-#é€šè¿‡è§£æçš„libraryfoldersè·å–æ¸¸æˆå®‰è£…çš„åº“ä½ç½®
+#Í¨¹ı½âÎöµÄlibraryfolders»ñÈ¡ÓÎÏ·°²×°µÄ¿âÎ»ÖÃ
 function Get-GamePath {
   $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
   $count = 0..$lowCount
-  foreach ($num in $count)  #æ‰‹åŠ¨é€’å½’
+  foreach ($num in $count)  #ÊÖ¶¯µİ¹é
   {
     if ($global:libraryfolders."$num".apps.636480 -ne $null)
    {
      return $global:libraryfolders."$num".path.Replace('\\','\')
    }
   }
-  #é”™è¯¯å¤„ç†
-  Write-Warning "æ— æ³•è·å–æ¸¸æˆå®‰è£…è·¯å¾„æˆ–æœªå®‰è£…æ¸¸æˆ"  
+  #´íÎó´¦Àí
+  Write-Warning "ÎŞ·¨»ñÈ¡ÓÎÏ·°²×°Â·¾¶»òÎ´°²×°ÓÎÏ·"  
   return ""
 }
 
 function DownloadAndApply-BepInEX {
-  if ( (Test-Path -Path "$gamePath\winhttp.dll") -eq $true )  #å¦‚æœå·²ç»å®‰è£…å°±è·³è¿‡
+  if ( (Test-Path -Path "$gamePath\winhttp.dll") -eq $true )  #Èç¹ûÒÑ¾­°²×°¾ÍÌø¹ı
   {
-    Write-Host "å·²ç»å®‰è£…BepInEXï¼Œè·³è¿‡"
+    Write-Host "ÒÑ¾­°²×°BepInEX£¬Ìø¹ı"
     return $true 
   }
   else
   {
-    Write-Host "æ­£åœ¨ä¸‹è½½BepInEX (5.4.22 for x64)..." 
-    #åˆ›å»ºsessionå¹¶ä½¿ç”¨ç›´é“¾apiè¯·æ±‚æ–‡ä»¶
+    Write-Host "ÕıÔÚÏÂÔØBepInEX (5.4.22 for x64)..." 
+    #´´½¨session²¢Ê¹ÓÃÖ±Á´apiÇëÇóÎÄ¼ş
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
     $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
@@ -386,31 +386,31 @@ function DownloadAndApply-BepInEX {
         "sec-fetch-user"="?1"
         "upgrade-insecure-requests"="1"
       }
-      if ($? -eq $true)  #æ— æŠ¥é”™å°±æ ¡éªŒå¹¶è§£å‹
+      if ($? -eq $true)  #ÎŞ±¨´í¾ÍĞ£Ñé²¢½âÑ¹
       {
         $hash_ = (Get-FileHash $BepDownloadPath -Algorithm SHA256).Hash
-        Write-Host "ä¸‹è½½çš„BepInEXçš„Hash: $hash_"
+        Write-Host "ÏÂÔØµÄBepInEXµÄHash: $hash_"
         if ($hash_ -eq "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F") 
         { 
-          Expand-Archive -Path $BepDownloadPath -DestinationPath $gamePath -Force  #å¼ºåˆ¶è¦†ç›–
+          Expand-Archive -Path $BepDownloadPath -DestinationPath $gamePath -Force  #Ç¿ÖÆ¸²¸Ç
           if ($_ -eq $null) {
-            Write-Host "BepInEXå·²å®‰è£…"           
+            Write-Host "BepInEXÒÑ°²×°"           
             return $true 
           }
-          else { #é”™è¯¯å¤„ç†
-           Write-Warning "BepInEXå®‰è£…å¤±è´¥"
+          else { #´íÎó´¦Àí
+           Write-Warning "BepInEX°²×°Ê§°Ü"
            return $false 
           }
         }
-        else #é”™è¯¯å¤„ç†
+        else #´íÎó´¦Àí
         { 
-          Write-Warning "ä¸‹è½½çš„BepInEXæ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"
+          Write-Warning "ÏÂÔØµÄBepInEXĞ£Ñé²»Í¨¹ı£¬Çë·´À¡»òÖØĞÂÏÂÔØ"
           return $false
         }
       }
-      else #é”™è¯¯å¤„ç†
+      else #´íÎó´¦Àí
       {
-          Write-Warning "BepInEXä¸‹è½½å¤±è´¥ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"        
+          Write-Warning "BepInEXÏÂÔØÊ§°Ü£¬Çë·´À¡»òÖØĞÂÏÂÔØ"        
         retrun $false
       }
    }
@@ -419,14 +419,14 @@ function DownloadAndApply-BepInEX {
 function DownloadAndApply-ATrans {
   if ( (Test-Path -Path "$gamePath\BepInEx\core\XUnity.Common.dll") -eq $true )
   {
-    Write-Host "å·²ç»å®‰è£…XUnity.AutoTranslatorï¼Œè·³è¿‡"
+    Write-Host "ÒÑ¾­°²×°XUnity.AutoTranslator£¬Ìø¹ı"
     return $true 
   }
   else
   {
-    Write-Host "æ­£åœ¨ä¸‹è½½XUnity.AutoTranslator (5.3.0)..." 
-    Start-Sleep -Seconds 10  #apiåªèƒ½10sè°ƒç”¨ä¸€æ¬¡ï¼Œä¸‹è½½å¤ªå¿«äº†
-    #åˆ›å»ºsessionå¹¶ä½¿ç”¨ç›´é“¾apiè¯·æ±‚æ–‡ä»¶
+    Write-Host "ÕıÔÚÏÂÔØXUnity.AutoTranslator (5.3.0)..." 
+    Start-Sleep -Seconds 10  #apiÖ»ÄÜ10sµ÷ÓÃÒ»´Î£¬ÏÂÔØÌ«¿ìÁË
+    #´´½¨session²¢Ê¹ÓÃÖ±Á´apiÇëÇóÎÄ¼ş
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
     $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
@@ -455,119 +455,119 @@ function DownloadAndApply-ATrans {
       if ($? -eq $true)
       {
         $hash_ = (Get-FileHash $ATransDownloadPath -Algorithm SHA256).Hash
-        Write-Host "ä¸‹è½½çš„XUnity.AutoTranslatorçš„Hash: $hash_"
+        Write-Host "ÏÂÔØµÄXUnity.AutoTranslatorµÄHash: $hash_"
         if ($hash_ -eq "E9D2C514408833D516533BCC96E64C246140F6A8579A5BC4591697BB8D16DEE3") 
         { 
           Expand-Archive -Path $ATransDownloadPath -DestinationPath $gamePath -Force
           if ($_ -eq $null) {
-            Write-Host "XUnity.AutoTranslatorå·²å®‰è£…"           
+            Write-Host "XUnity.AutoTranslatorÒÑ°²×°"           
             return $true 
           }
           else {
-           Write-Warning "XUnity.AutoTranslatorå®‰è£…å¤±è´¥"
+           Write-Warning "XUnity.AutoTranslator°²×°Ê§°Ü"
            return $false 
           }
         }
         else 
         { 
-          Write-Warning "ä¸‹è½½çš„XUnity.AutoTranslatoræ ¡éªŒä¸é€šè¿‡æˆ–å‘æœåŠ¡å™¨è¯·æ±‚è¿‡å¿«ï¼Œè¯·åé¦ˆæˆ–ç¨åé‡æ–°ä¸‹è½½ï¼ˆé‡æ–°è¿è¡Œè„šæœ¬ï¼‰"
+          Write-Warning "ÏÂÔØµÄXUnity.AutoTranslatorĞ£Ñé²»Í¨¹ı»òÏò·şÎñÆ÷ÇëÇó¹ı¿ì£¬Çë·´À¡»òÉÔºóÖØĞÂÏÂÔØ£¨ÖØĞÂÔËĞĞ½Å±¾£©"
           return $false
         }
       }
       else
       {
-          Write-Warning "XUnity.AutoTranslatorä¸‹è½½å¤±è´¥ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"        
+          Write-Warning "XUnity.AutoTranslatorÏÂÔØÊ§°Ü£¬Çë·´À¡»òÖØĞÂÏÂÔØ"        
         retrun $false
       }
    }
 }
 
 function Apply-MLang {
-  #å®šä¹‰æ–‡ä»¶ä½ç½®
+  #¶¨ÒåÎÄ¼şÎ»ÖÃ
   $file1 = "$gameLibPath\steamapps\workshop\content\636480\3237432182\main_extra-sch.txt"
   $file2 = "$gameLibPath\steamapps\workshop\content\636480\3237432182\main-sch.txt"
   $targetPath = "$gamePath\BepInEX\Translation\en\Text"
-  if ( (Test-Path -Path $file1) -eq $true ) #å¦‚æœæ–‡ä»¶å­˜åœ¨
+  if ( (Test-Path -Path $file1) -eq $true ) #Èç¹ûÎÄ¼ş´æÔÚ
   {
-    Write-Host "å·²ç»è®¢é˜…ç¿»è¯‘æ–‡ä»¶"
-    if ( (Test-Path -Path $targetPath) -ne $true ) { mkdir $targetPath }  #å¦‚æœç›®æ ‡ç›®å½•ä¸å­˜åœ¨åˆ™æ–°å»º
+    Write-Host "ÒÑ¾­¶©ÔÄ·­ÒëÎÄ¼ş"
+    if ( (Test-Path -Path $targetPath) -ne $true ) { mkdir $targetPath }  #Èç¹ûÄ¿±êÄ¿Â¼²»´æÔÚÔòĞÂ½¨
 
-    if ($? -eq $true)  #å¦‚æœç›®å½•åˆ›å»ºæˆåŠŸ
+    if ($? -eq $true)  #Èç¹ûÄ¿Â¼´´½¨³É¹¦
     {
       #1
       Copy-Item -Path $file1 -Destination $targetPath -Force
-      if ($? -ne $true) { Write-Warning "å¯¼å…¥ç¿»è¯‘æ–‡ä»¶ main_extra-sch å¤±è´¥" } else { Write-Host "å¯¼å…¥ç¿»è¯‘æ–‡ä»¶ main_extra-sch æˆåŠŸ" }
+      if ($? -ne $true) { Write-Warning "µ¼Èë·­ÒëÎÄ¼ş main_extra-sch Ê§°Ü" } else { Write-Host "µ¼Èë·­ÒëÎÄ¼ş main_extra-sch ³É¹¦" }
 
 
       #2
       Copy-Item -Path $file2 -Destination $targetPath -Force
       if ($? -ne $true) {
-        Write-Warning "å¯¼å…¥ç¿»è¯‘æ–‡ä»¶ main-sch å¤±è´¥" 
+        Write-Warning "µ¼Èë·­ÒëÎÄ¼ş main-sch Ê§°Ü" 
         return $false
-      } else  { Write-Host "å¯¼å…¥ç¿»è¯‘æ–‡ä»¶ main-sch æˆåŠŸ" }
-      #æ— æŠ¥é”™å°±æ‰§è¡Œåˆ°è¿™é‡Œ
-      Write-Host "å¯¼å…¥ç¿»è¯‘æ–‡ä»¶æˆåŠŸ" 
+      } else  { Write-Host "µ¼Èë·­ÒëÎÄ¼ş main-sch ³É¹¦" }
+      #ÎŞ±¨´í¾ÍÖ´ĞĞµ½ÕâÀï
+      Write-Host "µ¼Èë·­ÒëÎÄ¼ş³É¹¦" 
       return $true
     }
-    else  #é”™è¯¯å¤„ç†
+    else  #´íÎó´¦Àí
     {
-      Write-Warning "åˆ›å»ºç›®å½•å¤±è´¥"      
+      Write-Warning "´´½¨Ä¿Â¼Ê§°Ü"      
     }
   }
-  else  #é”™è¯¯å¤„ç†
+  else  #´íÎó´¦Àí
   {
-    Write-Warning "æœªè®¢é˜… æˆ– Steamæœªä¸‹è½½ç¿»è¯‘æ–‡ä»¶åˆ°æœ¬åœ°ï¼ˆSteamæ˜¯å¦å·²ç»å¯åŠ¨ï¼ŸSteamåœ¨åå°æ—¶æ‰ä¼šå°†å·¥åŠé¡¹ç›®ä¸‹è½½åˆ°æœ¬åœ°ï¼‰"
+    Write-Warning "Î´¶©ÔÄ »ò SteamÎ´ÏÂÔØ·­ÒëÎÄ¼şµ½±¾µØ£¨SteamÊÇ·ñÒÑ¾­Æô¶¯£¿SteamÔÚºóÌ¨Ê±²Å»á½«¹¤·»ÏîÄ¿ÏÂÔØµ½±¾µØ£©"
     return $false
   }
 }
 
-#é€€å‡ºè„šæœ¬é€’å½’
+#ÍË³ö½Å±¾µİ¹é
 function Exit-IScript {
-  Read-Host "æ‚¨ç°åœ¨å¯ä»¥å…³é—­çª—å£äº†"
+  Read-Host "ÄúÏÖÔÚ¿ÉÒÔ¹Ø±Õ´°¿ÚÁË"
   Exit
   Exit-IScript
 }
 
 
-###ä¸»ç¨‹åº
-Write-Host "# RFç¤¾åŒºå¤šè¯­è¨€ ç®€ä½“ä¸­æ–‡ å®‰è£…è„šæœ¬
-# å®‰è£…è„šæœ¬ ç”± Github@RavenfieldCommunity ç»´æŠ¤
-# å‚è§: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
-# å‚è§: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
+###Ö÷³ÌĞò
+Write-Host "# RFÉçÇø¶àÓïÑÔ ¼òÌåÖĞÎÄ °²×°½Å±¾
+# °²×°½Å±¾ ÓÉ Github@RavenfieldCommunity Î¬»¤
+# ²Î¼û: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
+# ²Î¼û: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
 
-# æç¤ºï¼šåœ¨å·²å®‰è£…æ±‰åŒ–çš„æƒ…å†µä¸‹é‡æ–°å®‰è£…æ±‰åŒ– => ç­‰ä»·äºæ›´æ–°
-# æç¤ºï¼šä»»ä½•Bugå¯åœ¨Steamè¯„è®ºåŒºæˆ–ç™¾åº¦è´´å§ã€RavenfieldCommunityæå‡º
-# å½“å‰æœ€æ–°ç‰ˆä¸º Update 1 (202408301700)
+# ÌáÊ¾£ºÔÚÒÑ°²×°ºº»¯µÄÇé¿öÏÂÖØĞÂ°²×°ºº»¯ => µÈ¼ÛÓÚ¸üĞÂ
+# ÌáÊ¾£ºÈÎºÎBug¿ÉÔÚSteamÆÀÂÛÇø»ò°Ù¶ÈÌù°É¡¢RavenfieldCommunityÌá³ö
+# µ±Ç°×îĞÂ°æÎª Update 1 (202408301700)
 "
 
-#æ‰“å°ä¸‹è½½ç›®å½•
-Write-Host "ä¸‹è½½ç›®å½•ï¼š$downloadPath"
+#´òÓ¡ÏÂÔØÄ¿Â¼
+Write-Host "ÏÂÔØÄ¿Â¼£º$downloadPath"
 
-#å¦‚æœè·å–steamå®‰è£…ç›®å½•æ²¡æŠ¥é”™
+#Èç¹û»ñÈ¡steam°²×°Ä¿Â¼Ã»±¨´í
 if ($errorWhenGetPath_ -eq $true)
 {
-  Write-Host "Steamå®‰è£…è·¯å¾„ï¼š$($global:steamPath)"
+  Write-Host "Steam°²×°Â·¾¶£º$($global:steamPath)"
 
-  #è·å–libraryfolders
+  #»ñÈ¡libraryfolders
   $global:libraryfolders = Get-Libraryfolders
   if ($global:libraryfolders -eq ""){ Exit-IScript }
 
-  #è·å–æ¸¸æˆåº“ä½ç½®
+  #»ñÈ¡ÓÎÏ·¿âÎ»ÖÃ
   $global:gameLibPath = Get-GamePath
   if ($global:gameLibPath -eq ""){ Exit-IScript }
-  Write-Host "æ¸¸æˆæ‰€åœ¨Steamåº“è·¯å¾„ï¼š$($global:gameLibPath)"
+  Write-Host "ÓÎÏ·ËùÔÚSteam¿âÂ·¾¶£º$($global:gameLibPath)"
 
-  #è®¡ç®—æ¸¸æˆå®‰è£…ä½ç½®
+  #¼ÆËãÓÎÏ·°²×°Î»ÖÃ
   $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
-  Write-Host "æ¸¸æˆæ‰€åœ¨å®‰è£…è·¯å¾„ï¼š$($global:gamePath)"
+  Write-Host "ÓÎÏ·ËùÔÚ°²×°Â·¾¶£º$($global:gamePath)"
  
-  if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #å¦‚æœå¤±è´¥å°±exit
-  if ( (DownloadAndApply-ATrans) -ne $true) { Exit-IScript }  #å¦‚æœå¤±è´¥å°±exit
-  $result_ = Apply-MLang  #è¿™ä¸ªå°±ä¸ç”¨åˆ¤æ–­äº†
+  if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #Èç¹ûÊ§°Ü¾Íexit
+  if ( (DownloadAndApply-ATrans) -ne $true) { Exit-IScript }  #Èç¹ûÊ§°Ü¾Íexit
+  $result_ = Apply-MLang  #Õâ¸ö¾Í²»ÓÃÅĞ¶ÏÁË
   Exit-IScript
 }
-else  #é”™è¯¯å¤„ç†
+else  #´íÎó´¦Àí
 {
-  Write-Host "æ— æ³•è·å–Steamå®‰è£…è·¯å¾„"
+  Write-Host "ÎŞ·¨»ñÈ¡Steam°²×°Â·¾¶"
   Exit-IScript
 }
