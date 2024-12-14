@@ -1,31 +1,32 @@
-#RavenMCN°²×°½Å±¾
+#RavenMCNå®‰è£…è„šæœ¬
 
-Write-Host "# RavenM²å¼þ¹úÄÚ°æ °²×°½Å±¾
-# RavenM¹úÄÚ°æ ÓÉ RavenfieldÌù°É°ÉÖ÷@Aya Î¬»¤
-# °²×°½Å±¾ ÓÉ Github@RavenfieldCommunity Î¬»¤
-# ²Î¼û: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
+Write-Host "# RavenM è”æœºæ’ä»¶å›½å†…ç‰ˆ å®‰è£…æ–‡ä»¶ç‰ˆ å®‰è£…è„šæœ¬
+# RavenMå›½å†…ç‰ˆ ç”± Ravenfieldè´´å§å§ä¸»@Aya ç»´æŠ¤
+# å®‰è£…è„šæœ¬ ç”± Github@RavenfieldCommunity ç»´æŠ¤
+# å‚è§: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
 
-#ÌáÊ¾£ºÔÚÒÑ°²×°²å¼þµÄÇé¿öÏÂÖØÐÂ°²×°²å¼þ => µÈ¼ÛÓÚ¸üÐÂ
-#ÌáÊ¾£º±¾µØµÄ°²×°ÎÄ¼þ»á×Ô¶¯´Ó·þÎñÆ÷»ñÈ¡ÐÂµÄ²å¼þ
+#æç¤ºï¼šåœ¨å·²å®‰è£…æ’ä»¶çš„æƒ…å†µä¸‹é‡æ–°å®‰è£…æ’ä»¶ => ç­‰ä»·äºŽæ›´æ–°
+#æç¤ºï¼šæœ¬åœ°çš„å®‰è£…æ–‡ä»¶ä¼šè‡ªåŠ¨ä»ŽæœåŠ¡å™¨èŽ·å–æ–°çš„æ’ä»¶
+#æç¤ºï¼šå·²çŸ¥Windows Defenderä¼šè¯¯æŠ¥å®‰è£…æ–‡ä»¶ï¼Œå‚è€ƒï¼ˆå®‰è£…åŽè®°å¾—å›žå¤åŽŸæ¥çš„WDè®¾ç½®ï¼Œä¸å»ºè®®ä½¿ç”¨é“¾æŽ¥ä¸­æä¾›çš„å·¥å…·ï¼ï¼‰ï¼šhttps://blog.csdn.net/qq_54780911/article/details/121993809
 "
 
-#¶¨Òå±äÁ¿
-#»ñÈ¡±¾µØÂ·¾¶
+#å®šä¹‰å˜é‡
+#èŽ·å–æœ¬åœ°è·¯å¾„
 $path = (Get-ChildItem Env:appdata).Value
 $folderPath = "$path\RavenMCN"
 $zipPath = "$folderPath\RavenMCN.zip"
 $tempPath = "$folderPath\Temp.zip"
-$exePath = "$folderPath\RavenMÒ»¼ü°²×°¹¤¾ß.exe"
+$exePath = "$folderPath\RavenMä¸€é”®å®‰è£…å·¥å…·.exe"
 
 if ( (Test-Path -Path $folderPath)-ne $true) {$result_ = mkdir $folderPath}
 
-#´òÓ¡ÏÂÔØÄ¿Â¼
-Write-Host "ÏÂÔØÄ¿Â¼£º$folderPath"
+#æ‰“å°ä¸‹è½½ç›®å½•
+Write-Host "ä¸‹è½½ç›®å½•ï¼š$folderPath"
 
-#¶¨Òåº¯Êý
+#å®šä¹‰å‡½æ•°
 function Download-RavenMCN {
-  Write-Host "ÕýÔÚÏÂÔØÎÄ¼þ..." 
-  #´´½¨session²¢Ê¹ÓÃÖ±Á´apiÇëÇóÎÄ¼þ
+  Write-Host "æ­£åœ¨ä¸‹è½½æ–‡ä»¶..." 
+  #åˆ›å»ºsessionå¹¶ä½¿ç”¨ç›´é“¾apiè¯·æ±‚æ–‡ä»¶
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
@@ -42,7 +43,7 @@ function Download-RavenMCN {
       "accept-encoding"="gzip, deflate, br, zstd"
       "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
       "priority"="u=0, i"
-      "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
+      "sec-ch-ua"="`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
       "sec-ch-ua-mobile"="?0"
       "sec-ch-ua-platform"="`"Windows`""
       "sec-fetch-dest"="document"
@@ -65,9 +66,9 @@ function Download-RavenMCN {
 }
 
 function CheckAndApplyTemp-RavenMCN {
-  #Ð£Ñéhash
+  #æ ¡éªŒhash
   $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
-  Write-Host "ÏÂÔØµÄ°²×°ÎÄ¼þµÄHash: $hash"
+  Write-Host "ä¸‹è½½çš„å®‰è£…æ–‡ä»¶çš„Hash: $hash"
   if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
   { 
     Copy-Item -Path $tempPath -Destination $zipPath
@@ -76,61 +77,61 @@ function CheckAndApplyTemp-RavenMCN {
   }
   else 
   { 
-    Write-Host "ÏÂÔØµÄ°²×°ÎÄ¼þÐ£Ñé²»Í¨¹ý£¬Çë·´À¡»òÖØÐÂÏÂÔØ"
+    Write-Host "ä¸‹è½½çš„å®‰è£…æ–‡ä»¶æ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"
     return $false
   }
 }
 
 function CheckAndRunLocal-RavenMCN {
-  #Ð£Ñéhash
+  #æ ¡éªŒhash
   $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
-  Write-Host "°²×°ÎÄ¼þHash: $hash"
+  Write-Host "å®‰è£…æ–‡ä»¶Hash: $hash"
   if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
   { 
-    #½âÑ¹
-    Write-Host "ÕýÔÚÆô¶¯ÎÄ¼þ..."
+    #è§£åŽ‹
+    Write-Host "æ­£åœ¨å¯åŠ¨æ–‡ä»¶..."
     Expand-Archive $zipPath -DestinationPath $folderPath -Force
-    #ÔËÐÐ   
+    #è¿è¡Œ   
     if ($_ -eq $null) { Start-Process $exePath } else { return $false }
-    Write-Host "ÌáÊ¾£ºÔËÐÐ°²×°ÎÄ¼þ²»ÐèÒª¹ÜÀíÔ±È¨ÏÞ"
-    $result_ = Read-Host -Prompt "ÇëµÈ´ý°²×°¹¤¾ß³öÏÖÊ±ÔÙ¹Ø±Õ±¾´°¿Ú"
+    Write-Host "æç¤ºï¼šè¿è¡Œå®‰è£…æ–‡ä»¶ä¸éœ€è¦ç®¡ç†å‘˜æƒé™"
+    $result_ = Read-Host -Prompt "è¯·ç­‰å¾…å®‰è£…å·¥å…·å‡ºçŽ°æ—¶å†å…³é—­æœ¬çª—å£"
     return $true
   }
   else 
   { 
-    Write-Host "°²×°ÎÄ¼þÐ£Ñé²»Í¨¹ý£¬Çë·´À¡»òÖØÐÂÏÂÔØ"
+    Write-Host "å®‰è£…æ–‡ä»¶æ ¡éªŒä¸é€šè¿‡ï¼Œè¯·åé¦ˆæˆ–é‡æ–°ä¸‹è½½"
     UpdateLocal-RavenMCN
     return $false
   }
 }
 
 function UpdateLocal-RavenMCN {
-  Write-Host "ÖØÐÂÏÂÔØ°²×°ÎÄ¼þ£¬ÏÂ´ÎÆô¶¯Ê±ÉúÐ§..."
+  Write-Host "é‡æ–°ä¸‹è½½å®‰è£…æ–‡ä»¶ï¼Œä¸‹æ¬¡å¯åŠ¨æ—¶ç”Ÿæ•ˆ..."
   Download-RavenMCN
 }
 
 function MainGet-RavenMCN {
   if (Download-RavenMCN -eq $true)
   {
-    Write-Host "°²×°ÎÄ¼þÏÂÔØ²¢Ó¦ÓÃ³É¹¦"
+    Write-Host "å®‰è£…æ–‡ä»¶ä¸‹è½½å¹¶åº”ç”¨æˆåŠŸ"
     $result_ = CheckAndRunLocal-RavenMCN
   }
   else
   {
-    Write-Host "°²×°ÎÄ¼þÏÂÔØ»òÓ¦ÓÃÊ§°Ü£¬Çë¼ì²éÍøÂç»ò·´À¡"
+    Write-Host "å®‰è£…æ–‡ä»¶ä¸‹è½½æˆ–åº”ç”¨å¤±è´¥ï¼Œè¯·æ£€æŸ¥ç½‘ç»œæˆ–åé¦ˆ"
   }
 }
 
 function Exit-IScript
 {
-  $result_ = Read-Host "ÄúÏÖÔÚ¿ÉÒÔ¹Ø±Õ´°¿ÚÁË"
+  $result_ = Read-Host "æ‚¨çŽ°åœ¨å¯ä»¥å…³é—­çª—å£äº†"
 }
 
-#Ö÷´úÂë
+#ä¸»ä»£ç 
 if ( (Test-Path -Path $zipPath) -eq $true)
 {
-  Write-Host "±¾µØ´æÔÚ°²×°ÎÄ¼þ£¬ÊÇ·ñÖ±½ÓÔËÐÐ£¿" 
-  $yesRun = Read-Host -Prompt "°´ »Ø³µ¼ü ÔòÖ±½ÓÔËÐÐ±¾µØ°²×°ÎÄ¼þ£¬°´ ÈÎÒâ¼ü²¢»Ø³µ ÔòÖØÐÂÏÂÔØ>"
+  Write-Host "æœ¬åœ°å­˜åœ¨å®‰è£…æ–‡ä»¶ï¼Œæ˜¯å¦ç›´æŽ¥è¿è¡Œï¼Ÿ" 
+  $yesRun = Read-Host -Prompt "æŒ‰ å›žè½¦é”® åˆ™ç›´æŽ¥è¿è¡Œæœ¬åœ°å®‰è£…æ–‡ä»¶ï¼ŒæŒ‰ ä»»æ„é”®å¹¶å›žè½¦ åˆ™é‡æ–°ä¸‹è½½>"
   if ($yesRun  -eq "")
   {
     $result_ = CheckAndRunLocal-RavenMCN
