@@ -455,7 +455,7 @@ function DownloadAndApply-Rvmcn {
     {
       $parsedJson = $request_.Content | ConvertFrom-Json
       Write-Host "将下载的RavenMCN版本: $($parsedJson.body)"
-      Write-Host "正在下载RavenMCN ..."
+      Write-Host "正在下载RavenMCN..."
       $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $parsedJson.assets[0].browser_download_url `
         -WebSession $session `
         -OutFile $RvmcnDownloadPath `
