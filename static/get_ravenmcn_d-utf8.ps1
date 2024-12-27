@@ -6,102 +6,59 @@
 ##src: https://github.com/BartJolling/ps-steam-cmd
 ###start module
 Enum State
-{
-    Start = 0
-    Property = 1
-    Object = 2
-    Conditional = 3
-    Finished = 4
-    Closed = 5
+{Start = 0; Property = 1; Object = 2; Conditional = 3; Finished = 4; Closed = 5;
 };
+
 Class VdfDeserializer
 {
     [PSCustomObject] Deserialize([string]$vdfContent)
     {
-        if([string]::IsNullOrWhiteSpace($vdfContent)) {
-            throw 'Mandatory argument $vdfContent must be a non-empty, non-whitespace object of type [string]';
-        }
-
+        if([string]::IsNullOrWhiteSpace($vdfContent)) { throw 'Mandatory argument $vdfContent must be a non-empty, non-whitespace object of type [string]'; }
         [System.IO.TextReader]$reader = [System.IO.StringReader]::new($vdfContent);
         return $this.Deserialize($reader);
     }
 
     [PSCustomObject] Deserialize([System.IO.TextReader]$txtReader)
     {
-        if( !$txtReader ){
-            throw 'Mandatory arguments $textReader missing.';
-        }
-        
+        if( !$txtReader ){ throw 'Mandatory arguments $textReader missing.'; } 
         $vdfReader = [VdfTextReader]::new($txtReader);
         $result = [PSCustomObject]@{ };
-
         try
         {
-            if (!$vdfReader.ReadToken())
-            {
-                throw "Incomplete VDF data.";
-            }
-
+            if (!$vdfReader.ReadToken()){ throw "Incomplete VDF data."; }
             $prop = $this.ReadProperty($vdfReader);
             Add-Member -InputObject $result -MemberType NoteProperty -Name $prop.Key -Value $prop.Value;
         }
         finally 
         {
-            if($vdfReader)
-            {
-                $vdfReader.Close();
-            }
+            if($vdfReader) { $vdfReader.Close(); }
         }
         return $result;
     }
-
     [hashtable] ReadProperty([VdfTextReader]$vdfReader)
     {
         $key=$vdfReader.Value;
-
-        if (!$vdfReader.ReadToken())
-        {
-            throw "Incomplete VDF data.";
-        }
-
+        if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
         if ($vdfReader.CurrentState -eq [State]::Property)
         {
-            $result = @{
-                Key = $key
-                Value = $vdfReader.Value
-            }
+            $result = @{ Key = $key; Value = $vdfReader.Value; }
         }
         else
         {
-            $result = @{
-                Key = $key
-                Value = $this.ReadObject($vdfReader);
-            }
+            $result = @{ Key = $key; Value = $this.ReadObject($vdfReader); }
         }
         return $result;
     }
-
     [PSCustomObject] ReadObject([VdfTextReader]$vdfReader)
     {
         $result = [PSCustomObject]@{ };
-
-        if (!$vdfReader.ReadToken())
-        {
-            throw "Incomplete VDF data.";
-        }
-
+        if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
         while ( ($vdfReader.CurrentState -ne [State]::Object) -or ($vdfReader.Value -ne "}"))
         {
             [hashtable]$prop = $this.ReadProperty($vdfReader);
-            
             Add-Member -InputObject $result -MemberType NoteProperty -Name $prop.Key -Value $prop.Value;
-
-            if (!$vdfReader.ReadToken())
-            {
-                throw "Incomplete VDF data.";
-            }
+            if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
         }
-
         return $result;
     }     
 }
@@ -109,59 +66,33 @@ Class VdfTextReader
 {
     [string]$Value;
     [State]$CurrentState;
-
     hidden [ValidateNotNull()][System.IO.TextReader]$_reader;
-
     hidden [ValidateNotNull()][char[]]$_charBuffer=;
     hidden [ValidateNotNull()][char[]]$_tokenBuffer=;
-
     hidden [int32]$_charPos;
     hidden [int32]$_charsLen;
     hidden [int32]$_tokensize;
     hidden [bool]$_isQuoted;
-
     VdfTextReader([System.IO.TextReader]$txtReader)
     {
-        if( !$txtReader ){
-            throw "Mandatory arguments `$textReader missing.";
-        }
-
+        if( !$txtReader ){ throw "Mandatory arguments `$textReader missing."; }
         $this._reader = $txtReader;
-
         $this._charBuffer=[char[]]::new(1024);
         $this._tokenBuffer=[char[]]::new(4096);
-    
         $this._charPos=0;
         $this._charsLen=0;
         $this._tokensize=0;
         $this._isQuoted=$false;
-
         $this.Value="";
         $this.CurrentState=[State]::Start;
     }
-
-    <#
-    .SYNOPSIS
-        Reads a single token. The value is stored in the $Value property
-
-    .DESCRIPTION
-        Returns $true if a token was read, $false otherwise.
-    #>
     [bool] ReadToken()
     {
-        if (!$this.SeekToken())
-        {
-            return $false;
-        }
-
+        if (!$this.SeekToken()) { return $false; }
         $this._tokenSize = 0;
-
         while($this.EnsureBuffer())
         {
             [char]$curChar = $this._charBuffer[$this._charPos];
-
-            #No special treatment for escape characters
-
             #region Quote
             if ($curChar -eq '"' -or (!$this._isQuoted -and [Char]::IsWhiteSpace($curChar)))
             {
@@ -171,7 +102,6 @@ Class VdfTextReader
                 return $true;
             }
             #endregion Quote
-
             #region Object Start/End
             if (($curChar -eq '{') -or ($curChar -eq '}'))
             {
@@ -196,7 +126,6 @@ Class VdfTextReader
                 }
             }
             #endregion Object Start/End
-
             #region Long Token
             $this._tokenBuffer[$this._tokenSize++] = $curChar;
             $this._charPos++;
@@ -205,19 +134,7 @@ Class VdfTextReader
 
         return $false;
     }
-
-    [void] Close()
-    {
-        $this.CurrentState = [State]::Closed;
-    }
-
-    <#
-    .SYNOPSIS
-        Seeks the next token in the buffer.
-
-    .DESCRIPTION
-        Returns $true if a token was found, $false otherwise.
-    #>
+    [void] Close() { $this.CurrentState = [State]::Closed; }
     hidden [bool] SeekToken()
     {
         while($this.EnsureBuffer())
@@ -228,7 +145,6 @@ Class VdfTextReader
                 $this._charPos++;
                 continue;
             }
-
             # Token
             if ($this._charBuffer[$this._charPos] -eq '"')
             {
@@ -236,7 +152,6 @@ Class VdfTextReader
                 $this._charPos++;
                 return $true;
             }
-
             # Comment
             if ($this._charBuffer[$this._charPos] -eq '/')
             {
@@ -244,52 +159,26 @@ Class VdfTextReader
                 $this._charPos++;
                 continue;
             }            
-
             $this._isQuoted = $false;
             return $true;
         }
-
         return $false;
     }
-
-    <#
-    .SYNOPSIS
-        Seeks the next newline in the buffer.
-
-    .DESCRIPTION
-        Returns $true if \n was found, $false otherwise.
-    #>
     hidden [bool] SeekNewLine()
     {
         while ($this.EnsureBuffer())
         {
-            if ($this._charBuffer[++$this._charPos] == '\n')
-            {
-                return $true;
-            }
+            if ($this._charBuffer[++$this._charPos] == '\n'){ return $true; }
         }
         return $false;
     }
-    
-    <#
-    .SYNOPSIS
-        Refills the buffer if we're at the end.
-
-    .DESCRIPTION
-        Returns $false if the stream was empty, $true otherwise.
-    #>
     hidden [bool]EnsureBuffer()
     {
-        if($this._charPos -lt $this._charsLen -1)
-        {
-            return $true;
-        }
-
+        if($this._charPos -lt $this._charsLen -1) { return $true; }
         [int32] $remainingChars = $this._charsLen - $this._charPos;
         $this._charBuffer[0] = $this._charBuffer[($this._charsLen - 1) * $remainingChars]; #A bit of mathgic to improve performance by avoiding a conditional.
         $this._charsLen = $this._reader.Read($this._charBuffer, $remainingChars, 1024 - $remainingChars) + $remainingChars;
         $this._charPos = 0;
-
         return ($this._charsLen -ne 0);
     }
 }
@@ -307,9 +196,15 @@ $global:gamePath = ""  #游戏本体位置
 $global:libraryfolders = ""  #文件libraryfolders.vdf的位置
 #获取下载路径
 $appdataPath = (Get-ChildItem Env:appdata).Value
-$downloadPath = "$appdataPath\RavenMCND"   
-$BepDownloadPath = "$downloadPath\Bep.zip"   #BepInEX下载到的本地文件
-$RvmcnDownloadPath = "$downloadPath\Rvncm.zip"  #Autotranslator下载到的本地文件
+$downloadPath = "$appdataPath\RavenfieldCommunityCN"   
+$bepInEXDownloadPath = "$downloadPath\Bep.zip"   #BepInEX下载到的本地文件
+$ravenmCNDownloadPath = "$downloadPath\Rvncm.zip"  #RavenMCN下载到的本地文件
+
+#定义下载链接与文件hash
+$bepInEXUrlID = "iMcD41xbcqgf"
+$bepInEXInfo = "5.4.22 for x64"
+$bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
+$translatorUrlID = "iNKGb1xbf8ze"
 
 if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #如果下载路径不存在则新建
 
@@ -318,10 +213,26 @@ function Get-Libraryfolders {
   if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
   {
     $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
-    if ($? -eq $true)
+    if ($? -eq $true) { return $result_.libraryfolders }
+    else  #错误处理
     {
-      return $result_.libraryfolders
+      Write-Warning "无法获取Libraryfolders"
+      return ""
     }
+  }
+  else  #错误处理
+  {
+    Write-Warning "无法获取Libraryfolders"
+    return ""
+  }
+}
+
+#获取并解析libraryfolders的备用方式
+function Get-LibraryfoldersSecond {
+  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
+  {
+    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\steamapps\libraryfolders.vdf"))" );
+    if ($? -eq $true) { return $result_.libraryfolders }
     else  #错误处理
     {
       Write-Warning "无法获取Libraryfolders"
@@ -341,13 +252,18 @@ function Get-GamePath {
   $count = 0..$lowCount
   foreach ($num in $count)  #手动递归
   {
-    if ($global:libraryfolders."$num".apps.636480 -ne $null)
-   {
-     return $global:libraryfolders."$num".path.Replace('\\','\')
-   }
+    if ($global:libraryfolders."$num".apps.636480 -ne $null) { return $global:libraryfolders."$num".path.Replace('\\','\'); }
   }
   #错误处理
-  Write-Warning "无法获取游戏安装路径或未安装游戏"  
+  Write-Warning "方式1无法获取游戏安装路径或未安装游戏"
+  Get-LibraryfoldersSecond #使用方式2
+  $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
+  $count = 0..$lowCount
+  foreach ($num in $count)  #手动递归
+  {
+    if ($global:libraryfolders."$num".apps.636480 -ne $null) { return $global:libraryfolders."$num".path.Replace('\\','\'); }
+  }
+  Write-Warning "方式2无法获取游戏安装路径或未安装游戏"
   return ""
 }
 
@@ -359,25 +275,25 @@ function DownloadAndApply-BepInEX {
   }
   else
   {
-    Write-Host "正在下载BepInEX (5.4.22 for x64)..." 
+    Write-Host "正在下载BepInEX ($($bepInEXInfo))..." 
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36 Edg/141.0.0.0"
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
     $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
     $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/iMcD41xbcqgf&type=down" `
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down" `
       -WebSession $session `
-      -OutFile $BepDownloadPath `
+      -OutFile $bepInEXDownloadPath `
       -Headers @{
         "authority"="api.leafone.cn"
         "method"="GET"
-        "path"="/api/lanzou?url=https://www.lanzouj.com/iMcD41xbcqgf&type=down"
+        "path"="/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down"
         "scheme"="https"
         "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
         "accept-encoding"="gzip, deflate, br, zstd"
         "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
         "priority"="u=0, i"
-        "sec-ch-ua"="`"Microsoft Edge`";v=`"141`", `"Chromium`";v=`"141`", `"Not.A/Brand`";v=`"24`""
+        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
         "sec-ch-ua-mobile"="?0"
         "sec-ch-ua-platform"="`"Windows`""
         "sec-fetch-dest"="document"
@@ -388,11 +304,11 @@ function DownloadAndApply-BepInEX {
       }
       if ($? -eq $true)  #无报错就校验并解压
       {
-        $hash_ = (Get-FileHash $BepDownloadPath -Algorithm SHA256).Hash
+        $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
         Write-Host "下载的BepInEX的Hash: $hash_"
-        if ($hash_ -eq "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F") 
+        if ($hash_ -eq $bepInEXHash) 
         { 
-          Expand-Archive -Path $BepDownloadPath -DestinationPath $gamePath -Force  #强制覆盖
+          Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $gamePath -Force  #强制覆盖
           if ($_ -eq $null) {
             Write-Host "BepInEX已安装"           
             return $true 
@@ -404,7 +320,7 @@ function DownloadAndApply-BepInEX {
         }
         else #错误处理
         { 
-          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载"
+          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
           return $false
         }
       }
@@ -416,7 +332,7 @@ function DownloadAndApply-BepInEX {
    }
 }
 
-function DownloadAndApply-Rvmcn {
+function DownloadAndApply-RavenMCN {
     Write-Host "正在获取RavenMCN信息..." 
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -453,12 +369,12 @@ function DownloadAndApply-Rvmcn {
         -ContentType "application/json;charset=utf-8"
     if ($? -eq $true)
     {
-      $parsedJson = $request_.Content | ConvertFrom-Json
-      Write-Host "将下载的RavenMCN版本: $($parsedJson.body)"
+      $json_ = $request_.Content | ConvertFrom-Json
+      Write-Host "将下载的RavenMCN版本: $($json_.body)"
       Write-Host "正在下载RavenMCN..."
-      $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $parsedJson.assets[0].browser_download_url `
+      $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
         -WebSession $session `
-        -OutFile $RvmcnDownloadPath `
+        -OutFile $ravenmCNDownloadPath `
         -Headers @{
           "Accept"="gzip, deflate, br, zstd"
           "Accept-Encoding"="gzip, deflate, br, zstd"
@@ -475,7 +391,7 @@ function DownloadAndApply-Rvmcn {
         -ContentType "application/zip"
       if ($_ -eq $null) {
         Write-Host "RavenMCN已下载"      
-        Expand-Archive -Path $RvmcnDownloadPath -DestinationPath "$gamePath\BepInEx\plugins" -Force
+        Expand-Archive -Path $ravenmCNDownloadPath -DestinationPath "$gamePath\BepInEx\plugins" -Force
         if ($_ -eq $null) {
           Write-Host "RavenMCN已安装"           
           return $true 
@@ -515,6 +431,13 @@ Write-Host "# RavenM联机插件 直接安装脚本
 #提示：本地的安装文件会自动从服务器获取新的插件
 "
 
+if ([Environment]::Is32BitOperatingSystem) 
+{
+  Write-Host ""
+  Write-Warning "可能不支持本机的32位系统，需要手动安装!"
+  Write-Host ""
+}
+
 #打印下载目录
 Write-Host "下载目录：$downloadPath"
 
@@ -537,7 +460,7 @@ if ($errorWhenGetPath_ -eq $true)
   Write-Host "游戏所在安装路径：$($global:gamePath)"
  
   if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #如果失败就exit
-  if ( (DownloadAndApply-Rvmcn) -ne $true) { Exit-IScript }  #如果失败就exit
+  if ( (DownloadAndApply-RavenMCN) -ne $true) { Exit-IScript }  #如果失败就exit
   Exit-IScript
 }
 else  #错误处理

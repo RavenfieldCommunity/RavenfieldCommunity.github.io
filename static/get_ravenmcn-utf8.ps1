@@ -13,10 +13,13 @@ Write-Host "# RavenM 联机插件国内版 安装文件版 安装脚本
 #定义变量
 #获取本地路径
 $path = (Get-ChildItem Env:appdata).Value
-$folderPath = "$path\RavenMCN"
+$folderPath = "$path\RavenfieldCommunityCN"
 $zipPath = "$folderPath\RavenMCN.zip"
-$tempPath = "$folderPath\Temp.zip"
+$tempPath = "$folderPath\RavenMCNTemp.zip"
 $exePath = "$folderPath\RavenM一键安装工具.exe"
+
+$ravenMCNUrlID = "ih1aS1z0ofne"
+$ravenMCNUrlHash = "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78"
 
 if ( (Test-Path -Path $folderPath)-ne $true) {$result_ = mkdir $folderPath}
 
@@ -31,13 +34,13 @@ function Download-RavenMCN {
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
   $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down" `
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/$($ravenMCNUrlID)&type=down" `
     -WebSession $session `
     -OutFile $tempPath `
     -Headers @{
       "authority"="api.leafone.cn"
       "method"="GET"
-      "path"="/api/lanzou?url=https://www.lanzouj.com/ih1aS1z0ofne&type=down"
+      "path"="/api/lanzou?url=https://www.lanzouj.com/$($ravenMCNUrlID)&type=down"
       "scheme"="https"
       "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
       "accept-encoding"="gzip, deflate, br, zstd"
@@ -69,7 +72,7 @@ function CheckAndApplyTemp-RavenMCN {
   #校验hash
   $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
   Write-Host "下载的安装文件的Hash: $hash"
-  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
+  if ($hash -eq $ravenMCNUrlHash) 
   { 
     Copy-Item -Path $tempPath -Destination $zipPath
     if ($_ -eq $null) { return $true }
@@ -86,7 +89,7 @@ function CheckAndRunLocal-RavenMCN {
   #校验hash
   $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
   Write-Host "安装文件Hash: $hash"
-  if ($hash -eq "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78") 
+  if ($hash -eq $ravenMCNUrlHash) 
   { 
     #解压
     Write-Host "正在启动文件..."
@@ -124,7 +127,9 @@ function MainGet-RavenMCN {
 
 function Exit-IScript
 {
-  $result_ = Read-Host "您现在可以关闭窗口了"
+  Read-Host "您现在可以关闭窗口了"
+  exit
+  Exit-IScript
 }
 
 #主代码
