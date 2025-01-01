@@ -203,9 +203,9 @@ $translatorDownloadPath = "$downloadPath\Translator.zip"  #Autotranslator下载�
 $bepInEXUrlID = "iMcD41xbcqgf"
 $bepInEXInfo = "5.4.22 for x64"
 $bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
-$translatorUrlID = "idKrB2jmz29a"
+$translatorUrlID = "irKw82jng2be"
 $translatorInfo = "5.3.0"
-$translatorHash = "E0673102E11958314155A91AE683EE1ACCB1FC87FCD94D74900F14006292C9A5"
+$translatorHash = "B63E5E9727B0E6226C56F51D5937817589328ECED0DFC21A438D6ED62981297D"
 
 if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #如果下载路径不存在则新建
 
