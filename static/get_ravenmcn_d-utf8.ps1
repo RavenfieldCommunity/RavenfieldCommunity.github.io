@@ -333,7 +333,6 @@ function DownloadAndApply-BepInEX {
 }
 
 function DownloadAndApply-RavenMCN {
-    Write-Host "正在获取RavenMCN信息..." 
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
@@ -370,8 +369,7 @@ function DownloadAndApply-RavenMCN {
     if ($? -eq $true)
     {
       $json_ = $request_.Content | ConvertFrom-Json
-      Write-Host "将下载的RavenMCN版本: $($json_.body)"
-      Write-Host "正在下载RavenMCN..."
+      Write-Host "正在下载RavenMCN $($json_.body)..."
       $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
         -WebSession $session `
         -OutFile $ravenmCNDownloadPath `
