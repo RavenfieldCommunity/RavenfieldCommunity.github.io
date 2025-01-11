@@ -8,7 +8,6 @@
 Enum State
 {Start = 0; Property = 1; Object = 2; Conditional = 3; Finished = 4; Closed = 5;
 };
-
 Class VdfDeserializer
 {
     [PSCustomObject] Deserialize([string]$vdfContent)
@@ -198,13 +197,12 @@ $global:libraryfolders = ""  #文件libraryfolders.vdf的位置
 $appdataPath = (Get-ChildItem Env:appdata).Value
 $downloadPath = "$appdataPath\RavenfieldCommunityCN"   
 $bepInEXDownloadPath = "$downloadPath\Bep.zip"   #BepInEX下载到的本地文件
-$ravenmCNDownloadPath = "$downloadPath\Rvncm.zip"  #RavenMCN下载到的本地文件
+$ravenmCNDownloadPath = "$downloadPath\RavenMCN.zip"  #RavenMCN下载到的本地文件
 
 #定义下载链接与文件hash
 $bepInEXUrlID = "iMcD41xbcqgf"
 $bepInEXInfo = "5.4.22 for x64"
 $bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
-$translatorUrlID = "iNKGb1xbf8ze"
 
 if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath } #如果下载路径不存在则新建
 
@@ -213,25 +211,6 @@ function Get-Libraryfolders {
   if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
   {
     $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
-    if ($? -eq $true) { return $result_.libraryfolders }
-    else  #错误处理
-    {
-      Write-Warning "无法获取Libraryfolders"
-      return ""
-    }
-  }
-  else  #错误处理
-  {
-    Write-Warning "无法获取Libraryfolders"
-    return ""
-  }
-}
-
-#获取并解析libraryfolders的备用方式
-function Get-LibraryfoldersSecond {
-  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
-  {
-    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\steamapps\libraryfolders.vdf"))" );
     if ($? -eq $true) { return $result_.libraryfolders }
     else  #错误处理
     {
@@ -256,7 +235,23 @@ function Get-GamePath {
   }
   #错误处理
   Write-Warning "方式1无法获取游戏安装路径或未安装游戏"
-  Get-LibraryfoldersSecond #使用方式2
+  
+  #使用方式2
+  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
+  {
+    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\steamapps\libraryfolders.vdf"))" );
+    if ($? -eq $true) { return $result_.libraryfolders }
+    else  #错误处理
+    {
+      Write-Warning "方式2无法获取Libraryfolders"
+      return ""
+    }
+  }
+  else  #错误处理
+  {
+    Write-Warning "方式2无法获取Libraryfolders"
+    return ""
+  } 
   $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
   $count = 0..$lowCount
   foreach ($num in $count)  #手动递归
@@ -369,7 +364,7 @@ function DownloadAndApply-RavenMCN {
     if ($? -eq $true)
     {
       $json_ = $request_.Content | ConvertFrom-Json
-      Write-Host "正在下载RavenMCN $($json_.body)..."
+      Write-Host "正在下载RavenMCN ($($json_.body))..."
       $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
         -WebSession $session `
         -OutFile $ravenmCNDownloadPath `
