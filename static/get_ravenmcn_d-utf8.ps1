@@ -320,7 +320,7 @@ function DownloadAndApply-BepInEX {
         }
       }
       else #错误处理
-      {
+      {	
           Write-Warning "BepInEX下载失败，请反馈或重新下载"        
         retrun $false
       }
@@ -335,17 +335,17 @@ function DownloadAndApply-RavenMCN {
     $session.Cookies.Add((New-Object System.Net.Cookie("oschina_new_user", "false", "/", "gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("remote_way", "http", "/", "gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("sensorsdata2015jssdkchannel", "", "/", ".gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lvt_a1170d3ff94c236dacd36a05af8385ea", "1725715290", "/", ".gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lvt_000", "000", "/", ".gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("sensorsdata2015jssdkcross", "", "/", ".gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("slide_id", "10", "/", "gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("visit-gitee--2024-12-11", "1", "/", "gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("sl-session", "OlKNOtd/Zmf+URP8HkWv+Q==", "/", "gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("BEC", "1f1759df3ccd099821dcf0da6feb0357", "/", "gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("visit-gitee--000", "1", "/", "gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("sl-session", "000", "/", "gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("BEC", "000", "/", "gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("tz", "Asia%2FShanghai", "/", "gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("HMACCOUNT", "76092188FF7965CE", "/", ".gitee.com")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lpvt_24f17767262929947cc3631f99bfd274", "1734684314", "/", ".gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("HMACCOUNT", "000", "/", ".gitee.com")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lpvt_000", "000", "/", ".gitee.com")))
     $session.Cookies.Add((New-Object System.Net.Cookie("gitee-session-n", "", "/", ".gitee.com")))
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/tags/677540488" `
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/372833" `
         -WebSession $session `
         -Headers @{
           "Accept"="application/json, text/plain, */*"
@@ -383,7 +383,11 @@ function DownloadAndApply-RavenMCN {
         } `
         -ContentType "application/zip"
       if ($_ -eq $null) {
-        Write-Host "RavenMCN已下载"      
+        Write-Host "RavenMCN已下载"   
+        if ( $isUpdate -eq $true ) { 
+            Write-Host "正在等待游戏进程关闭 (20s)..."
+            Wait-Process -Name "ravenfield" -Timeout 20
+        }		
         Expand-Archive -Path $ravenmCNDownloadPath -DestinationPath "$gamePath\BepInEx\plugins" -Force
         if ($_ -eq $null) {
           Write-Host "RavenMCN已安装"           
@@ -430,6 +434,8 @@ if ([Environment]::Is32BitOperatingSystem)
   Write-Warning "可能不支持本机的32位系统，需要手动安装!"
   Write-Host ""
 }
+
+if ( $isUpdate -eq $true ) { Write-Host "开始更新RavenM ..." }
 
 #打印下载目录
 Write-Host "下载目录：$downloadPath"
