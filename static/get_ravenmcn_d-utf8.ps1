@@ -384,7 +384,7 @@ function DownloadAndApply-RavenMCN {
         -ContentType "application/zip"
       if ($_ -eq $null) {
         Write-Host "RavenMCN已下载"   
-        if ( $isUpdate -eq $true ) { 
+        if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
             Write-Host "正在等待游戏进程关闭 (20s)..."
             Wait-Process -Name "ravenfield" -Timeout 20
         }		
