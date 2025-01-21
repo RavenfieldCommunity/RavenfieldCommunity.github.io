@@ -172,7 +172,7 @@ ApplyBepInEX()
 ApplyRavenMCN()
 #最后步骤
 print('''
-已将将所需文件部署到本地，由于Steam的限制,您仍需要进行以下操作 (参见: https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang#启用Proton.html):
+已将所需文件安装到本地, 由于Steam的限制, 您仍需要进行以下操作 (参见: https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang#启用Proton.html):
   1. Steam启用Proton
   2. 为RF强制启用Proton
   3. 给RF添加启动参数: WINEDLLOVERRIDES=\"winhttp.dll=n,b\" %command%
