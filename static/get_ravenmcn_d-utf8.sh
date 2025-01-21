@@ -7,7 +7,12 @@ echo "#提示：在已安装插件的情况下重新安装插件 => 等价于更
 echo "#提示：脚本不适用Windows, 运行脚本需要先安装Python3! 参见: https://liaoxuefeng.com/books/python/install/index.html"
 echo ""
 
-python -c "import sys
+[ "$EUID" -eq 0 ] && { echo "警告: 此脚本不能以root身份运行."; exit 1; }
+
+if [[ $get_arch =~ "aarch64" ]];then
+    echo "警告: ARM架构可能不兼容此插件!"
+
+python3 -c "import sys
 import os
 import zipfile
 import urllib
@@ -36,7 +41,7 @@ def GetGamePath():
     return GetSteamAppsPath() + 'common/Ravenfield/'
 	
 def PrintWarning(text):
-    print('\033[33m' + text + '\033[0m')
+    print('\033[33m警告: ' + text + '\033[0m')
 	
 def QuitScript():
     input('您现在可以退出脚本或关闭Shell了')
