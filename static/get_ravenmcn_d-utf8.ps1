@@ -265,7 +265,7 @@ function Get-GamePath {
 function DownloadAndApply-BepInEX {
   if ( (Test-Path -Path "$gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
   {
-    Write-Host "已经安装BepInEX，跳过"
+    Write-Host "已经安装BepInEX, 跳过"
     return $true 
   }
   else
@@ -316,13 +316,13 @@ function DownloadAndApply-BepInEX {
         }
         else #错误处理
         { 
-          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
+          Write-Warning "下载的BepInEX校验不通过, 请反馈或重新下载或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本), 或更换网络环境"
           return $false
         }
       }
       else #错误处理
       {	
-          Write-Warning "BepInEX下载失败，请反馈或重新下载"        
+          Write-Warning "BepInEX下载失败, 请反馈或重新下载"        
         retrun $false
       }
    }
@@ -401,12 +401,12 @@ function DownloadAndApply-RavenMCN {
       }
       else 
       { 
-          Write-Warning "RavenMCN下载失败或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本）"
+          Write-Warning "RavenMCN下载失败或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
           return $false
       }     
     }
     else {
-      Write-Warning "无法获取RavenMCN信息或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本）"
+      Write-Warning "无法获取RavenMCN信息或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
       return $false 
     }
 }
@@ -425,27 +425,27 @@ Write-Host "# RavenM联机插件 直接安装脚本
 # 安装脚本 由 Github@RavenfieldCommunity 维护
 # 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
 
-# 提示：在已安装插件的情况下重新安装插件 => 等价于更新
-# 提示：本地的安装文件会自动从服务器获取新的插件
-# 提示：本安装脚本不适用Unix
+# 提示: 在已安装插件的情况下重新安装插件 => 等价于更新
+# 提示: 本地的安装文件会自动从服务器获取新的插件
+# 提示: 本安装脚本不适用Unix
 "
 
 if ([Environment]::Is32BitOperatingSystem) 
 {
   Write-Host ""
-  Write-Warning "可能不支持本机的32位系统，需要手动安装!"
+  Write-Warning "可能不支持本机的32位系统, 需要手动安装!"
   Write-Host ""
 }
 
 if ( $isUpdate -eq $true ) { Write-Host "开始更新RavenM ..." }
 
 #打印下载目录
-Write-Host "下载目录：$downloadPath"
+Write-Host "下载目录: $downloadPath"
 
 #如果获取steam安装目录没报错
 if ($errorWhenGetPath_ -eq $true)
 {
-  Write-Host "Steam安装路径：$($global:steamPath)"
+  Write-Host "Steam安装路径: $($global:steamPath)"
 
   #获取libraryfolders
   $global:libraryfolders = Get-Libraryfolders
@@ -454,11 +454,11 @@ if ($errorWhenGetPath_ -eq $true)
   #获取游戏库位置
   $global:gameLibPath = Get-GamePath
   if ($global:gameLibPath -eq ""){ Exit-IScript }
-  Write-Host "游戏所在Steam库路径：$($global:gameLibPath)"
+  Write-Host "游戏所在Steam库路径: $($global:gameLibPath)"
 
   #计算游戏安装位置
   $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
-  Write-Host "	$($global:gamePath)"
+  Write-Host "游戏所在安装路径: $($global:gamePath)"
  
   if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #如果失败就exit
   if ( (DownloadAndApply-RavenMCN) -ne $true) { Exit-IScript }  #如果失败就exit
