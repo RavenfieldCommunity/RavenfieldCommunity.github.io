@@ -48,7 +48,6 @@ def PrintWarning(text):
 
 #退出脚本func
 def QuitScript():
-    input('您现在可以退出脚本或关闭Shell了')
     quit()
 
 #安装bepinex
@@ -180,3 +179,6 @@ print('''
 ''')
 QuitScript()
 "
+
+echo '您现在可以退出脚本或关闭Shell了'
+read -s
