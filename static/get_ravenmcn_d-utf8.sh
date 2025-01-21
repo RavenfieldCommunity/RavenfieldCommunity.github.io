@@ -7,14 +7,6 @@ echo "#提示：在已安装插件的情况下重新安装插件 => 等价于更
 echo "#提示：脚本不适用Windows, 运行脚本需要先安装Python3! 参见: https://liaoxuefeng.com/books/python/install/index.html"
 echo ""
 
-downloadPath = "~/.steam/steam/steamapps/common"
-
-#退出脚本递归
-Exit-IScript() {
- # read "您现在可以关闭窗口了"
- # exit
-}
-
 python -c "import sys
 import os
 import zipfile
