@@ -48,7 +48,7 @@ def QuitScript():
     quit()
 
 def ApplyBepInEX():
-    if ( os.path.exists(GetGamePath() + "winhttp.dll") ):
+    if ( os.path.exists(GetGamePath() + 'winhttp.dll') ):
         print('已经安装BepInEX, 跳过')
         return
     header = {
@@ -132,10 +132,10 @@ def ApplyRavenMCN():
 ###main program
 ##系统检测
 if sys.platform == 'darwin':
-    print("本机为 Mac平台")
+    print('本机为 Mac平台')
     isMacos = True
 elif sys.platform == 'linux':
-    print("本机为 Linux平台")
+    print('本机为 Linux平台')
     isMacos = False
 else:
     PrintWarning('未知平台, 无法继续安装')
@@ -145,7 +145,7 @@ else:
 if ( os.path.exists(GetGamePath()) ):
     print('游戏所在安装路径: ' + GetGamePath())
 else:
-    PrintWarning("无法获取游戏安装路径或未安装游戏或Steam")
+    PrintWarning('无法获取游戏安装路径或未安装游戏或Steam')
     QuitScript()
 
 ##安装
@@ -155,7 +155,7 @@ print('')
 print('''已将将所需文件部署到本地，由于Steam的限制您仍需要进行以下操作 (参见: https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang#启用Proton.html):
   1. Steam启用Proton
   2. 为RF强制启用Proton
-  3. 给RF添加启动参数: WINEDLLOVERRIDES="winhttp.dll=n,b" %command%
+  3. 给RF添加启动参数: WINEDLLOVERRIDES=\"winhttp.dll=n,b\" %command%
 ''')
 QuitScript()
 "
