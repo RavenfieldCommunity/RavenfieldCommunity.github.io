@@ -426,6 +426,7 @@ Write-Host "# RavenM联机插件 直接安装脚本
 
 #提示：在已安装插件的情况下重新安装插件 => 等价于更新
 #提示：本地的安装文件会自动从服务器获取新的插件
+#提示：本安装脚本不适用Unix
 "
 
 if ([Environment]::Is32BitOperatingSystem) 
@@ -456,7 +457,7 @@ if ($errorWhenGetPath_ -eq $true)
 
   #计算游戏安装位置
   $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
-  Write-Host "游戏所在安装路径：$($global:gamePath)"
+  Write-Host "	$($global:gamePath)"
  
   if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #如果失败就exit
   if ( (DownloadAndApply-RavenMCN) -ne $true) { Exit-IScript }  #如果失败就exit
