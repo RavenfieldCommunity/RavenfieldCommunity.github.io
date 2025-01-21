@@ -300,6 +300,7 @@ function DownloadAndApply-BepInEX {
       if ($? -eq $true)  #无报错就校验并解压
       {
         $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
+	  Write-Host "BepInEX已下载"  
         Write-Host "下载的BepInEX的Hash: $hash_"
         if ($hash_ -eq $bepInEXHash) 
         { 
@@ -364,7 +365,7 @@ function DownloadAndApply-RavenMCN {
     if ($? -eq $true)
     {
       $json_ = $request_.Content | ConvertFrom-Json
-      Write-Host "正在下载RavenMCN ($($json_.body))..."
+      Write-Host "正在下载RavenMCN ($($json_.name))..."
       $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
         -WebSession $session `
         -OutFile $ravenmCNDownloadPath `
@@ -424,9 +425,9 @@ Write-Host "# RavenM联机插件 直接安装脚本
 # 安装脚本 由 Github@RavenfieldCommunity 维护
 # 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/ravenm.html
 
-#提示：在已安装插件的情况下重新安装插件 => 等价于更新
-#提示：本地的安装文件会自动从服务器获取新的插件
-#提示：本安装脚本不适用Unix
+# 提示：在已安装插件的情况下重新安装插件 => 等价于更新
+# 提示：本地的安装文件会自动从服务器获取新的插件
+# 提示：本安装脚本不适用Unix
 "
 
 if ([Environment]::Is32BitOperatingSystem) 
