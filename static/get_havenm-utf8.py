@@ -1,6 +1,13 @@
 #RF HavenM 安装脚本
 #感谢: BartJolling/ps-steam-cmd
 
+#退出脚本递归，但必须在各ps脚本手动定义
+function Exit-IScript {
+  Read-Host "您现在可以关闭窗口了 Now you can close this window";
+  Exit;
+  Exit-IScript;
+}
+
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
@@ -9,7 +16,7 @@ catch {
     iex($w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1')); 
 	if ($? -eq $true)
 	{
-		Write-Warning "Connot init corelib";
+		Write-Warning "无法初始化依赖库";
 		Exit-IScript;
 	}
 }
