@@ -181,7 +181,7 @@ Class VdfTextReader {
 
 #退出脚本递归，但必须在各ps脚本手动定义
 function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了";
+  Read-Host "您现在可以关闭窗口了 Now you can close this window";
   Exit;
   Exit-IScript;
 }
@@ -287,6 +287,7 @@ if ($? -eq $true) {
   #计算游戏安装位置
   $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield";
   Write-Host "游戏所在安装路径 Game path: $($global:gamePath)";
+  Write-Host "";
 }
 else  #错误处理
 {
