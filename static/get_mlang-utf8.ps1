@@ -2,6 +2,13 @@
 #感谢: BartJolling/ps-steam-cmd
 #感谢: api.leafone.cn
 
+#退出脚本递归
+function Exit-IScript {
+  Read-Host "您现在可以关闭窗口了"
+  Exit
+  Exit-IScript
+}
+
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
@@ -14,7 +21,6 @@ catch {
 		Exit-IScript;
 	}
 }
-
 
 #初始化变量
 #仅需要再次读写的变量才加上Global标志
@@ -197,13 +203,6 @@ function Apply-MLang {
     Write-Warning "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
     return $false
   }
-}
-
-#退出脚本递归
-function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了"
-  Exit
-  Exit-IScript
 }
 
 
