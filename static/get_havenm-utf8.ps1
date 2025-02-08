@@ -75,6 +75,7 @@ function Apply-HavenM {
 }
 
 function Apply-Updater {
+  if ($isUpdate -eq $true) { return; }
   $shortcutPath = [System.Environment]::GetFolderPath('Desktop') + "\\HavenM Updater.lnk"
   $target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
   $shell = New-Object -ComObject WScript.Shell 
@@ -94,7 +95,7 @@ Write-Host "# HavenM Installation script
 #Tip：Re-installing enquals updating
 #Tip：This script will create a updater shortcut in your desktop!
 "
-
+if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
-Exit-IScript
 Apply-Updater
+Exit-IScript
