@@ -74,7 +74,7 @@ function Apply-HavenM {
 	  if ( $isUpdate -eq $ture ) { 
 	    if ( $(tasklist | findstr "steam") -ne $null ) { 
           Write-Host "Relaunch game ..."
-		  start "steam://launch/636480"
+		  start "steam://launch/636480/dialog"
 		}
       }	
     }
