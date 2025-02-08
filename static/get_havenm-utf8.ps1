@@ -85,8 +85,6 @@ function Apply-HavenM {
 }
 
 function Apply-Updater {
-  if ($isUpdate -eq $true) { return; }
-  $shortcutPath = [System.Environment]::GetFolderPath('Desktop') + "\\HavenM Updater.lnk"
   $target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
   $shell = New-Object -ComObject WScript.Shell 
   $shortcut = $shell.CreateShortcut($shortcutPath)
