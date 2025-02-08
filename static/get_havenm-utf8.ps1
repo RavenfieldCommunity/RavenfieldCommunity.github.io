@@ -62,11 +62,21 @@ function Apply-HavenM {
     }
     if ($? -eq $true)  #无报错就apply
     {
+      if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
+        Write-Host "Waiting close game (20s)..."
+        Wait-Process -Name "ravenfield" -Timeout 20
+      }	
       Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
       if ($? -ne $true) {
         Write-Warning "Fail" 
       } else  { Write-Host "Success" }
       #无报错就执行到这里
+	  if ( $isUpdate -eq $ture ) { 
+	    if ( $(tasklist | findstr "steam") -ne $null ) { 
+          Write-Host "Relaunch game ..."
+		  start "steam://launch/636480"
+		}
+      }	
     }
     else #错误处理
     {
