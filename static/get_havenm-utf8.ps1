@@ -21,34 +21,17 @@ catch {
 	}
 }
 
+#创建session
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+$session.Cookies.Add((New-Object System.Net.Cookie("user_session", "000-", "/", "github.com")))
+
 function Apply-HavenM {
-  #创建session
-  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-  $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-  $session.Cookies.Add((New-Object System.Net.Cookie("_octo", "o", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("_device_id", "o", "/", "github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("user_session", "000-", "/", "github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("__Host-user_session_same_site", "000-", "/", "github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("logged_in", "no", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("dotcom_user", "null", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("color_mode", "null", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("cpu_bucket", "xlg", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("preferred_color_mode", "light", "/", ".github.com")))
-  $session.Cookies.Add((New-Object System.Net.Cookie("_gh_sess", "null", "/", "github.com")))
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/RavenfieldCommunity/HavenM/releases/latest" `
         -WebSession $session `
         -Headers @{
           "Accept"="application/json, text/plain, */*"
           "Accept-Encoding"="gzip, deflate, br, zstd"
-          "Accept-Language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-          "DNT"="1"
-          "Referer"="https://api.github.com"
-          "Sec-Fetch-Dest"="empty"
-          "Sec-Fetch-Mode"="cors"
-          "Sec-Fetch-Site"="same-origin"
-           "sec-ch-ua"="`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
-          "sec-ch-ua-mobile"="?0"
-          "sec-ch-ua-platform"="`"Windows`""
         } `
         -ContentType "application/json;charset=utf-8"
   if ($? -eq $true)
@@ -56,7 +39,7 @@ function Apply-HavenM {
     $json_ = $request_.Content | ConvertFrom-Json
 	Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
 	Write-Host "Update Note: 
-	$($json_.body)
+$($json_.body)
 	"
   }
   #下载
@@ -66,45 +49,24 @@ function Apply-HavenM {
     -WebSession $session `
     -OutFile $havenMDownloadPath `
     -Headers @{
-     "authority"="github.com"
-     "method"="GET"
-    "path"="/RavenfieldCommunity/HavenM/releases/download/Release/Assembly-CSharp.dll"
-    "scheme"="https"
     "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
     "accept-encoding"="gzip, deflate, br, zstd"
-    "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-    "dnt"="1"
-    "priority"="u=0, i"
-    "referer"="https://github.com/RavenfieldCommunity/HavenM/releases"
-    "sec-ch-ua"="`"Not A(Brand`";v=`"8`", `"Chromium`";v=`"132`", `"Microsoft Edge`";v=`"132`""
-    "sec-ch-ua-mobile"="?0"
-    "sec-ch-ua-platform"="`"Windows`""
-    "sec-fetch-dest"="document"
-    "sec-fetch-mode"="navigate"
-    "sec-fetch-site"="same-origin"
-    "sec-fetch-user"="?1"
-    "upgrade-insecure-requests"="1"
-    }
+   }
     if ($? -eq $true)  #无报错就apply
     {
       if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
         Write-Host "Waiting for game, close the game plz! (20s)..."
         Wait-Process -Name "ravenfield" -Timeout 20
       }	
+	  Write-Host "Installing ..."
       Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
       if ($? -ne $true) {
-        Write-Warning "Update Fail" 
-      } else  { Write-Host "Update Success" }
-	  if ( $isUpdate -eq $ture ) { 
-	    if ( $(tasklist | findstr "steam") -ne $null ) { 
-          Write-Host "Relaunch game ..."
-		  start "steam://launch/636480/dialog"
-		}
-      }	
+        Write-Warning "Install failed" 
+      } else  { Write-Host "Installed successfully" }
     }
     else #错误处理
     {
-      Write-Warning "Download HavenM fail"        
+      Write-Warning "Download HavenM failed"        
     }
 }
 
@@ -134,6 +96,86 @@ function Apply-Updater {
   }
 }
 
+function Apply-BepInEX {
+  if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
+  {
+    Write-Host "BepInEX is already installed, skip"
+  }
+  else
+  {
+    Write-Host "Downloading BepInEX (5.4.22 for x64)..." 
+	$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip" `
+      -WebSession $session `
+      -OutFile $bepInEXDownloadPath `
+      -Headers @{
+        "method"="GET"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+      }
+      if ($? -eq $true)  #无报错就校验并解压
+      {
+	    Write-Host "BepInEX downloaded"  
+        Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Forc
+        if ($? -eq $true) {
+            Write-Host "BepInEX installed"           
+        }
+        else { 
+           Write-Warning "BepInEX install failed"
+        }
+      }
+      else #错误处理
+      { 
+        Write-Warning "BepInEX install failed"
+      }
+    }
+}
+
+function Apply-ACUpdater {
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/RavenfieldCommunity/HavenM/releases/latest" `
+    -WebSession $session `
+    -Headers @{
+      "Accept"="application/json, text/plain, */*"
+      "Accept-Encoding"="gzip, deflate, br, zstd"
+    } `
+    -ContentType "application/json;charset=utf-8"
+  if ($? -eq $true)
+  {
+    $json_ = $request_.Content | ConvertFrom-Json
+	if (  (Test-Path -Path "$global:gamePath\Ravenfield\BepInEx\plugins\HavenM.ACUpdater.dll") -eq $true )
+	{
+      temp_ = Get-Date (Get-Item "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll").LastWriteTime
+      if ( $temp_ -gt (Get-Date $json_.assets[0].updated_at))
+	  {
+		Write-Host "ACUpdater is no update";
+        return;		
+	  }
+	}
+  }
+  
+  Write-Host "Downloading ACUpdater ..." 
+	$acUpdaterDownloadPath = "$global:downloadPath\HavenM.ACUpdater.zip"
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/ACUpdaterRelease/HavenM.ACUpdater.dll" `
+        -WebSession $session `
+		-OutFile $acUpdaterDownloadPath `
+        -Headers @{
+        "method"="GET"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+      }
+    if ($? -eq $true) {
+      Write-Host "ACUpdater downloaded"   		
+      Copy-Item $acUpdaterDownloadPath  "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll" -Force
+      if ($? -eq $true) {
+        Write-Host "ACUpdater installed"           
+      }
+      else {
+        Write-Warning "ACUpdater install failed"
+      }
+    }
+}
+
+
 ###主程序
 Write-Host "# HavenM Installation script
 # The project is made by Stand_Up
@@ -146,5 +188,13 @@ Write-Host "# HavenM Installation script
 "
 if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
+Apply-BepInEX
+Apply-ACUpdater
 Apply-Updater
+if ( $isUpdate -eq $ture ) { 
+  if ( $(tasklist | findstr "steam.exe") -ne $null ) { 
+    Write-Host "Relaunch game ..."
+    start "steam://launch/636480/dialog"
+  }
+}	
 Exit-IScript
