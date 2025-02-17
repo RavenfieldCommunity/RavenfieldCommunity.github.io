@@ -58,11 +58,11 @@ $($json_.body)
         Write-Host "Waiting for game, close the game plz! (20s)..."
         Wait-Process -Name "ravenfield" -Timeout 20
       }	
-	  Write-Host "Installing ..."
+	  Write-Host "Installing HavenM..."
       Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
       if ($? -ne $true) {
-        Write-Warning "Install failed" 
-      } else  { Write-Host "Installed successfully" }
+        Write-Warning "Install HavenM failed" 
+      } else  { Write-Host "HavenM installed" }
     }
     else #错误处理
     {
@@ -82,7 +82,7 @@ function Apply-Updater {
   $shortcut.Save()
   if ($? -eq $false)
   {
-    Write-Warning "Create shortcut in Desktop fail, plz check your Windows Denfender's log and allow this action (if there is already a shortcut in Desktop, ignore this warning)"
+    Write-Warning "Create shortcut in Desktop fail, plz check your Windows Denfender's log and allow this action (if there is already a shortcut in Desktop, INGORE this warning)"
 	Write-Warning "You can copy the command in website and right click desktop to create shortcut by yourself"
 	Write-Host "Creating shortcut for website in Desktop ..."
 	$shortcutPath = [System.Environment]::GetFolderPath('Desktop') + "`\HavenM.lnk"
@@ -164,13 +164,13 @@ function Apply-ACUpdater {
         "accept-encoding"="gzip, deflate, br, zstd"
       }
     if ($? -eq $true) {
-      Write-Host "ACUpdater downloaded"   		
+      Write-Host "Installing ACUpdater ..."   		
       Copy-Item $acUpdaterDownloadPath  "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll" -Force
       if ($? -eq $true) {
         Write-Host "ACUpdater installed"           
       }
       else {
-        Write-Warning "ACUpdater install failed"
+        Write-Warning "Install ACUpdater failed"
       }
     }
 }
@@ -184,7 +184,7 @@ Write-Host "# HavenM Installation script
 # Refer: https://github.com/RavenfieldCommunity/HavenM
 
 #Tip: Re-installing enquals updating
-#Tip: This script will create a updater shortcut in your desktop!
+#Tip: This script will create a updater shortcut in your desktop and install updater plugin!
 "
 if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
