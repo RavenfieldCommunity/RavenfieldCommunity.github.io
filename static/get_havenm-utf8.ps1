@@ -55,8 +55,9 @@ $($json_.body)
     if ($? -eq $true)  #无报错就apply
     {
       if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-        Write-Host "Waiting for game, close the game plz! (20s)..."
-        Wait-Process -Name "ravenfield" -Timeout 20
+	    Read-Host "Need to close game, press Enter to continue >"
+		taskkill /f /im ravenfield.exe
+        Wait-Process -Name "ravenfield" -Timeout 10
       }	
 	  Write-Host "Installing HavenM..."
       Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
@@ -68,32 +69,6 @@ $($json_.body)
     {
       Write-Warning "Download HavenM failed"        
     }
-}
-
-function Apply-Updater {
-  Write-Host "Creating shortcut for updater in Desktop ..."        
-  $shortcutPath = [System.Environment]::GetFolderPath('Desktop') + "`\HavenM Updater.lnk"
-  $target = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
-  $shell = New-Object -ComObject WScript.Shell 
-  $shortcut = $shell.CreateShortcut($shortcutPath)
-  $shortcut.TargetPath = $target
-  $shortcut.Arguments = " -nop -c `"$w=(New-Object System.Net.WebClient);$w.Encoding=[System.Text.Encoding]::UTF8;iex($w.DownloadString('http://ravenfieldcommunity.github.io/static/get_havenm-utf8.ps1'));Read-Host;`""
-  $shortcut.WorkingDirectory = [System.Environment]::GetFolderPath('Desktop')
-  $shortcut.Save()
-  if ($? -eq $false)
-  {
-    Write-Warning "Create shortcut in Desktop fail, plz check your Windows Denfender's log and allow this action (if there is already a shortcut in Desktop, INGORE this warning)"
-	Write-Warning "You can copy the command in website and right click desktop to create shortcut by yourself"
-	Write-Host "Creating shortcut for website in Desktop ..."
-	$shortcutPath = [System.Environment]::GetFolderPath('Desktop') + "`\HavenM.lnk"
-    $target = "https://github.com/RavenfieldCommunity/HavenM"
-    $shell = New-Object -ComObject WScript.Shell 
-    $shortcut = $shell.CreateShortcut($shortcutPath)
-    $shortcut.TargetPath = $target
-    $shortcut.IconLocation = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe,0"
-    $shortcut.WorkingDirectory = [System.Environment]::GetFolderPath('Desktop')
-    $shortcut.Save()
-  }
 }
 
 function Apply-BepInEX {
@@ -164,7 +139,8 @@ function Apply-ACUpdater {
         "accept-encoding"="gzip, deflate, br, zstd"
       }
     if ($? -eq $true) {
-      Write-Host "Installing ACUpdater ..."   		
+      Write-Host "Installing ACUpdater ..."   	
+      if ( (Test-Path "$global:gamePath\BepInEx\plugins") -ne $true ) { mkdir "$global:gamePath\BepInEx\plugins" }
       Copy-Item $acUpdaterDownloadPath  "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll" -Force
       if ($? -eq $true) {
         Write-Host "ACUpdater installed"           
@@ -182,15 +158,17 @@ Write-Host "# HavenM Installation script
 # Installation script is made by Github@RavenfieldCommunity
 # Discord server: ?
 # Refer: https://github.com/RavenfieldCommunity/HavenM
+# Refer: https://ravenfieldcommunity.github.io/docs/en/Projects/havenm.html
+
 
 #Tip: Re-installing enquals updating
-#Tip: This script will create a updater shortcut in your desktop and install updater plugin!
+#Tip: This script will install updater plugin!
+#提示: 中国玩家请使用上面网站提供的命令安装HavenM(可能未完工)!
 "
 if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
 Apply-BepInEX
 Apply-ACUpdater
-Apply-Updater
 if ( $isUpdate -eq $ture ) { 
   if ( $(tasklist | findstr "steam.exe") -ne $null ) { 
     Write-Host "Relaunch game ..."

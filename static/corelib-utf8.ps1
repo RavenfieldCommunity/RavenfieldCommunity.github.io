@@ -188,8 +188,10 @@ function Exit-IScript {
 
 #通过解析的libraryfolders获取游戏安装的库位置
 function Get-GameLibPath {
+  #使用方式1
   if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
   {
+	#获取vdf
     $originalString = Get-Content("$steamPath\config\libraryfolders.vdf");
     $result_ = $vdf.Deserialize( $originalString );
     if ($? -eq $true) { 
@@ -201,7 +203,7 @@ function Get-GameLibPath {
     	if ($parsedVdf."$num".apps.636480 -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
       }
       #错误处理
-    	Write-Warning "方式1无法获取游戏安装路径或未安装游戏 Method1 fail";
+      Write-Warning "方式1无法获取游戏安装路径或未安装游戏 Method1 fail";
     }
     else  #错误处理
     {
@@ -210,7 +212,7 @@ function Get-GameLibPath {
   }
   
   #使用方式2
-  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
+  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -eq $true ) 
   {
 	$originalString = Get-Content("$steamPath\steamapps\libraryfolders.vdf");
     $result_ = $vdf.Deserialize( $originalString );
@@ -247,6 +249,7 @@ function Get-GameLibPath {
   $result_ = Split-Path -Path (Get-Process ravenfield | Select-Object Path)[0].Path;
   if ( (Test-Path $result_) -eq $true )
   {
+	$global:gamePath = result_;  #游戏本体位置
 	return "$result_\..\..\..";
   }
   Write-Warning "方式4无法获取Libraryfolders Method4 fail";
@@ -258,7 +261,7 @@ function Get-GameLibPath {
 Write-Host "初始化环境 Initing env ...";
 
 #32位检测
-if ([Environment]::Is32BitOperatingSystem) { Write-Warning "可能不支持本机的32位系统，需要手动安装!"; }
+if ([Environment]::Is32BitOperatingSystem) { Write-Warning "可能不支持本机的32位系统，需要手动安装 The script may not support 32-bit system!"; }
 
 #获取下载路径
 $global:downloadPath = "$((Get-ChildItem Env:appdata).Value)\RavenfieldCommunityCN";
@@ -272,7 +275,7 @@ Write-Host "下载目录 Download path: $downloadPath";
 $vdf = [VdfDeserializer]::new();  #初始化VDF解析器
 $global:RFCCoreLibInited = $true; #是否加载了此远程ps脚本
 $global:gameLibPath = ""; #游戏安装的steam库的位置
-$global:gamePath = "";  #游戏本体位置
+if ($global:gamePath -eq $null) { $global:gamePath = ""; }  #游戏本体位置
 
 #获取steam安装路径
 $global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\');
@@ -285,7 +288,7 @@ if ($? -eq $true) {
   Write-Host "游戏所在Steam库路径 Game library path: $($global:gameLibPath)";
 
   #计算游戏安装位置
-  $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield";
+  if ($global:gamePath -eq "") { $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"; }
   Write-Host "游戏所在安装路径 Game path: $($global:gamePath)";
   Write-Host "";
 }
