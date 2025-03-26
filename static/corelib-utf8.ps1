@@ -245,8 +245,12 @@ function Get-GameLibPath {
   
   #使用方式4
   Write-Host "使用方式4 Using Method4 ..." 
-  $temp_ = Read-Host -Prompt "请在手动启动游戏后，按 回车键 After start game, press Enter>";
+  $temp_ = Read-Host -Prompt "为了获取游戏安装路径, 请在手动启动游戏后, 按 回车键 继续 To get the game install path,please start game by yourself, then press Enter:>";
   $result_ = Split-Path -Path (Get-Process ravenfield | Select-Object Path)[0].Path;
+  #if ($? -eq $true)
+  #{
+  #	  start "steam://launch/636480/dialog"
+  #}
   if ( (Test-Path $result_) -eq $true )
   {
 	$global:gamePath = result_;  #游戏本体位置
