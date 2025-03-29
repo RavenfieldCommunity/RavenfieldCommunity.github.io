@@ -204,11 +204,11 @@ function Get-GameLibPath {
     	if ($parsedVdf."$num".apps.636480 -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
       }
       #错误处理
-      Write-Warning "方式1无法获取游戏安装路径或未安装游戏 Method1 fail";
+      Write-Warning "方式1 无法获取游戏安装路径或未安装游戏 Method1 fail";
     }
     else  #错误处理
     {
-      Write-Warning "方式1无法获取Libraryfolders Method1 fail";
+      Write-Warning "方式1 无法获取Libraryfolders Method1 fail";
     }
   }
   
@@ -226,11 +226,11 @@ function Get-GameLibPath {
     	if ($parsedVdf."$num".apps.636480 -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
       }
       #错误处理
-    	Write-Warning "方式2无法获取游戏安装路径或未安装游戏 Method2 fail";
+    	Write-Warning "方式2 无法获取游戏安装路径或未安装游戏 Method2 fail";
     }
     else  #错误处理
     {
-      Write-Warning "方式2无法获取Libraryfolders Method2 fail";
+      Write-Warning "方式2 无法获取Libraryfolders Method2 fail";
     }
   }
   
@@ -241,7 +241,7 @@ function Get-GameLibPath {
   }
   else
   {
-	Write-Warning "方式3无法获取Libraryfolders Method3 fail";
+	Write-Warning "方式3 无法获取Libraryfolders Method3 fail";
   }	  
   
   #使用方式4
@@ -254,7 +254,7 @@ function Get-GameLibPath {
 	$global:gamePath = result_;  #游戏本体位置
 	return "$result_\..\..\..";
   }
-  Write-Warning "方式4无法获取Libraryfolders Method4 fail";
+  Write-Warning "方式4 无法获取游戏安装位置 Method4 fail";
   return $null;
 }
 
@@ -266,13 +266,13 @@ function Apply-BepInEXCN {
   
   if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
   {
-    Write-Host "已经安装BepInEX，跳过"
+    Write-Host "已经安装BepInEX, 跳过"
 	$global:isAlreadyInstalledBepInEX = $true
 	return $true
   }
   else
   {
-    Write-Host "正在下载BepInEX ($($bepInEXInfo))..." 
+    Write-Host "正在下载BepInEX ($($bepInEXInfo)) ..." 
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
@@ -302,28 +302,28 @@ function Apply-BepInEXCN {
       if ($? -eq $true)  #无报错就校验并解压
       {
         $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
-        Write-Host "下载的BepInEX的Hash: $hash_"
+        Write-Host "下载的 BepInEX 的Hash: $hash_"
         if ($hash_ -eq $bepInEXHash) 
         { 
           Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Force  #强制覆盖
           if ($? -eq $true) {
-            Write-Host "BepInEX已安装"           
+            Write-Host "BepInEX 已安装"           
             return $true 
           }
           else { #错误处理
-           Write-Warning "BepInEX安装失败"
+           Write-Warning "BepInEX 安装失败"
            return $false 
           }
         }
         else #错误处理
         { 
-          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
+          Write-Warning "下载的 BepInEX 校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
           return $false
         }
       }
       else #错误处理
       {
-          Write-Warning "BepInEX下载失败，请反馈或重新下载"        
+          Write-Warning "BepInEX 下载失败，请反馈或重新下载"        
         retrun $false
       }
    }
@@ -335,7 +335,7 @@ function Apply-BepInEXGithub {
     Write-Host "BepInEX is already installed, skip"
   }
   else {
-    Write-Host "Downloading BepInEX (5.4.22 for x64)..." 
+    Write-Host "Downloading BepInEX (5.4.22 for x64) ..." 
 	$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
     $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip" `
       -WebSession $session `

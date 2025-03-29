@@ -1,260 +1,4 @@
 #RF BepInEX卸载工具
-#感谢: BartJolling/ps-steam-cmd
-#感谢: api.leafone.cn
-
-###module: VdfDeserializer 
-##src: https://github.com/BartJolling/ps-steam-cmd
-###start module
-
-Enum State
-{Start = 0; Property = 1; Object = 2; Conditional = 3; Finished = 4; Closed = 5;
-};
-
-Class VdfDeserializer
-{
-    [PSCustomObject] Deserialize([string]$vdfContent)
-    {
-        if([string]::IsNullOrWhiteSpace($vdfContent)) { throw 'Mandatory argument $vdfContent must be a non-empty, non-whitespace object of type [string]'; }
-        [System.IO.TextReader]$reader = [System.IO.StringReader]::new($vdfContent);
-        return $this.Deserialize($reader);
-    }
-
-    [PSCustomObject] Deserialize([System.IO.TextReader]$txtReader)
-    {
-        if( !$txtReader ){ throw 'Mandatory arguments $textReader missing.'; } 
-        $vdfReader = [VdfTextReader]::new($txtReader);
-        $result = [PSCustomObject]@{ };
-        try
-        {
-            if (!$vdfReader.ReadToken()){ throw "Incomplete VDF data."; }
-            $prop = $this.ReadProperty($vdfReader);
-            Add-Member -InputObject $result -MemberType NoteProperty -Name $prop.Key -Value $prop.Value;
-        }
-        finally 
-        {
-            if($vdfReader) { $vdfReader.Close(); }
-        }
-        return $result;
-    }
-    [hashtable] ReadProperty([VdfTextReader]$vdfReader)
-    {
-        $key=$vdfReader.Value;
-        if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
-        if ($vdfReader.CurrentState -eq [State]::Property)
-        {
-            $result = @{ Key = $key; Value = $vdfReader.Value; }
-        }
-        else
-        {
-            $result = @{ Key = $key; Value = $this.ReadObject($vdfReader); }
-        }
-        return $result;
-    }
-    [PSCustomObject] ReadObject([VdfTextReader]$vdfReader)
-    {
-        $result = [PSCustomObject]@{ };
-        if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
-        while ( ($vdfReader.CurrentState -ne [State]::Object) -or ($vdfReader.Value -ne "}"))
-        {
-            [hashtable]$prop = $this.ReadProperty($vdfReader);
-            Add-Member -InputObject $result -MemberType NoteProperty -Name $prop.Key -Value $prop.Value;
-            if (!$vdfReader.ReadToken()) { throw "Incomplete VDF data."; }
-        }
-        return $result;
-    }     
-}
-Class VdfTextReader
-{
-    [string]$Value;
-    [State]$CurrentState;
-    hidden [ValidateNotNull()][System.IO.TextReader]$_reader;
-    hidden [ValidateNotNull()][char[]]$_charBuffer=;
-    hidden [ValidateNotNull()][char[]]$_tokenBuffer=;
-    hidden [int32]$_charPos;
-    hidden [int32]$_charsLen;
-    hidden [int32]$_tokensize;
-    hidden [bool]$_isQuoted;
-    VdfTextReader([System.IO.TextReader]$txtReader)
-    {
-        if( !$txtReader ){ throw "Mandatory arguments `$textReader missing."; }
-        $this._reader = $txtReader;
-        $this._charBuffer=[char[]]::new(1024);
-        $this._tokenBuffer=[char[]]::new(4096);
-        $this._charPos=0;
-        $this._charsLen=0;
-        $this._tokensize=0;
-        $this._isQuoted=$false;
-        $this.Value="";
-        $this.CurrentState=[State]::Start;
-    }
-    [bool] ReadToken()
-    {
-        if (!$this.SeekToken()) { return $false; }
-        $this._tokenSize = 0;
-        while($this.EnsureBuffer())
-        {
-            [char]$curChar = $this._charBuffer[$this._charPos];
-            #region Quote
-            if ($curChar -eq '"' -or (!$this._isQuoted -and [Char]::IsWhiteSpace($curChar)))
-            {
-                $this.Value = [string]::new($this._tokenBuffer, 0, $this._tokenSize);
-                $this.CurrentState = [State]::Property;
-                $this._charPos++;
-                return $true;
-            }
-            #endregion Quote
-            #region Object Start/End
-            if (($curChar -eq '{') -or ($curChar -eq '}'))
-            {
-                if ($this._isQuoted)
-                {
-                    $this._tokenBuffer[$this._tokenSize++] = $curChar;
-                    $this._charPos++;
-                    continue;
-                }
-                elseif ($this._tokenSize -ne 0)
-                {
-                    $this.Value = [string]::new($this._tokenBuffer, 0, $this._tokenSize);
-                    $this.CurrentState = [State]::Property;
-                    return $true;
-                }                
-                else
-                {
-                    $this.Value = $curChar.ToString();
-                    $this.CurrentState = [State]::Object;
-                    $this._charPos++;
-                    return $true;
-                }
-            }
-            #endregion Object Start/End
-            #region Long Token
-            $this._tokenBuffer[$this._tokenSize++] = $curChar;
-            $this._charPos++;
-            #endregion Long Token            
-        }
-
-        return $false;
-    }
-    [void] Close() { $this.CurrentState = [State]::Closed; }
-    hidden [bool] SeekToken()
-    {
-        while($this.EnsureBuffer())
-        {
-            # Skip Whitespace
-            if( [char]::IsWhiteSpace($this._charBuffer[$this._charPos]) )
-            {
-                $this._charPos++;
-                continue;
-            }
-            # Token
-            if ($this._charBuffer[$this._charPos] -eq '"')
-            {
-                $this._isQuoted = $true;
-                $this._charPos++;
-                return $true;
-            }
-            # Comment
-            if ($this._charBuffer[$this._charPos] -eq '/')
-            {
-                $this.SeekNewLine();
-                $this._charPos++;
-                continue;
-            }            
-            $this._isQuoted = $false;
-            return $true;
-        }
-        return $false;
-    }
-    hidden [bool] SeekNewLine()
-    {
-        while ($this.EnsureBuffer())
-        {
-            if ($this._charBuffer[++$this._charPos] == '\n'){ return $true; }
-        }
-        return $false;
-    }
-    hidden [bool]EnsureBuffer()
-    {
-        if($this._charPos -lt $this._charsLen -1) { return $true; }
-        [int32] $remainingChars = $this._charsLen - $this._charPos;
-        $this._charBuffer[0] = $this._charBuffer[($this._charsLen - 1) * $remainingChars]; #A bit of mathgic to improve performance by avoiding a conditional.
-        $this._charsLen = $this._reader.Read($this._charBuffer, $remainingChars, 1024 - $remainingChars) + $remainingChars;
-        $this._charPos = 0;
-        return ($this._charsLen -ne 0);
-    }
-}
-###end module
-
-
-#初始化变量
-$vdf = [VdfDeserializer]::new()  #初始化VDF解析器
-#获取Steam安装路径
-$global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\')
-$errorWhenGetPath_ = $?  #保存错误
-#仅需要再次读写的变量才加上Global标志
-$global:gameLibPath = "" #游戏安装的steam库的位置
-$global:gamePath = ""  #游戏本体位置
-$global:libraryfolders = ""  #文件libraryfolders.vdf的位置
-
-#获取并解析libraryfolders
-function Get-Libraryfolders {
-  if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) #如果存在就获取并解析
-  {
-    $result_ = $vdf.Deserialize( "$(Get-Content("$steamPath\config\libraryfolders.vdf"))" );
-    if ($? -eq $true)
-    {
-      return $result_.libraryfolders
-    }
-    else  #错误处理
-    {
-      Write-Warning "无法获取Libraryfolders"
-      return ""
-    }
-  }
-  else  #错误处理
-  {
-    Write-Warning "无法获取Libraryfolders"
-    return ""
-  }
-}
-
-#通过解析的libraryfolders获取游戏安装的库位置
-function Get-GamePath {
-  $lowCount = ($global:libraryfolders | Get-Member -MemberType NoteProperty).Count - 1
-  $count = 0..$lowCount
-  foreach ($num in $count)  #手动递归
-  {
-    if ($global:libraryfolders."$num".apps.636480 -ne $null)
-   {
-     return $global:libraryfolders."$num".path.Replace('\\','\')
-   }
-  }
-  #错误处理
-  Write-Warning "无法获取游戏安装路径或未安装游戏"  
-  return ""
-}
-
-
-function Apply-Action {
-  #定义文件位置
-  $file1 = "$gamePath\BepInEX"
-  $file2 = "$gamePath\winhttp.dll"
-  $file3 = "$gamePath\doorstop_config.ini"
-  if ( (Test-Path -Path $file2) -eq $true ) #如果文件存在
-  {
-    Write-Host "删除BepInEX文件夹 (1/3)..."
-	rm $file1 -Recurse
-	Write-Host "删除winhttp.dll (2/3)..."
-	rm $file2
-	Write-Host "删除doorstop_config.ini (3/3)..."
-	rm $file3
-  }
-  else  #错误处理
-  {
-    Write-Warning "未安装BepInEX"
-    return $false
-  }
-}
 
 #退出脚本递归
 function Exit-IScript {
@@ -264,51 +8,109 @@ function Exit-IScript {
 }	
 
 
-###主程序
-Write-Host "# RF BepInEX插件完全 卸载脚本
-# 安装脚本 由 Github@RavenfieldCommunity 维护
-# 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
-# 参见: https://steamcommunity.com/sharedfiles/filedetails/?id=3237432182
+$w=(New-Object System.Net.WebClient);
+$w.Encoding=[System.Text.Encoding]::UTF8;
+$global:corelibSrc = $null
+$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
+if ( $global:corelibSrc -eq $null ) {
+  $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
+}
+if ( $global:corelibSrc -eq $null ) {
+  Write-Warning "无法初始化依赖库 Cannot init corelib";
+  Exit-IScript;
+}
+else { iex $global:corelibSrc; }
 
-# 提示：此脚本会删除所有基于BepInEX的RF游戏插件BepInEX框架本体，包括社区多语言和RavenM！
+function Remove-BepInEX {
+  #定义文件位置
+  $file1 = "$global:gamePath\BepInEX"
+  $file2 = "$global:gamePath\winhttp.dll"
+  $file3 = "$global:gamePath\doorstop_config.ini"
+  if ( (Test-Path -Path $file2) -eq $true ) #如果文件存在
+  {
+    Write-Host "删除 BepInEX文件夹 (1/3) ..."
+	rm $file1 -Recurse
+	Write-Host "删除 winhttp.dll (2/3) ..."
+	rm $file2
+	Write-Host "删除 doorstop_config.ini (3/3) ..."
+	rm $file3
+  }
+  else  #错误处理
+  {
+    Write-Warning "未安装"
+    return $false
+  }
+}
+
+function Remove-MLang {
+  #定义文件位置
+  $file1 = "$global:gamePath\BepInEX\plugins\XUnity.AutoTranslator"
+  $file2 = "$global:gamePath\BepInEX\plugins\XUnity.ResourceRedirector"
+  $file3 = "$global:gamePath\BepInEx\core\XUnity.Common.dll"
+  $file4 = "$global:gamePath\BepInEx\Translation"
+  if ( (Test-Path -Path $file1) -eq $true ) #如果文件存在
+  {
+    Write-Host "删除 XUnity.AutoTranslator文件夹 (1/4) ..."
+	rm $file1 -Recurse
+	Write-Host "删除 XUnity.ResourceRedirector (2/4) ..."
+	rm $file2 -Recurse
+	Write-Host "删除 XUnity.Common.dll (3/4) ..."
+	rm $file3
+	Write-Host "删除 翻译文件 (4/4) ..."
+	rm $file4 -Recurse
+  }
+  else  #错误处理
+  {
+    Write-Warning "未安装"
+    return $false
+  }
+}
+
+function Remove-RavenMCN {
+  #定义文件位置
+  $file1 = "$global:gamePath\BepInEx\plugins\RavenM.dll"   #如果文件存在
+  if ( (Test-Path -Path $file1) -eq $true )  {
+    Write-Host "删除 联机插件 (1/1) ..."
+	rm $file1
+  }
+  else {
+    Write-Warning "未安装"
+    return $false
+  }
+}
+
+function Remove-HavenM {
+  #定义文件位置
+  $file1 = "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll"   #如果文件存在
+  if ( (Test-Path -Path $file1) -eq $true )  {
+    Write-Host "删除 自动更新服务 (1/1) ..."
+	rm $file1
+  }
+  else {
+    Write-Warning "未安装 自动更新服务"
+    return $false
+  }
+}
+
+###主程序
+Write-Host "# RF BepInEX插件 卸载脚本
+# 卸载脚本 由 Github@RavenfieldCommunity 维护
+# 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
+
 # 提示：报错请反馈！
 "
-
-Write-Host "Steam安装路径：$($global:steamPath)"
-
-  #获取libraryfolders
-  $global:libraryfolders = Get-Libraryfolders
-  if ($global:libraryfolders -eq ""){ Exit-IScript }
-
-  #获取游戏库位置
-  $global:gameLibPath = Get-GamePath
-  if ($global:gameLibPath -eq ""){ Exit-IScript }
-  Write-Host "游戏所在Steam库路径：$($global:gameLibPath)"
-
-  #计算游戏安装位置
-  $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"
-  Write-Host "游戏所在安装路径：$($global:gamePath)"
-  Write-Host ""
-
-#如果获取steam安装目录没报错
-if ($errorWhenGetPath_ -eq $true)
-{
-	
-  Write-Host "是否删除所有基于BepInEX的RF游戏插件与BepInEX本体（包括社区多语言和RavenM）？" 
-    $yesRun = Read-Host -Prompt "按 回车键 则取消执行，按 数字1 并回车 执行操作>"
-    if ($yesRun  -eq "1")
-    {
-      Apply-Action
-      Exit-IScript
-    }
-    else
-    {
-      Exit-IScript
-    }
-  Exit-IScript
+Write-Host "请选择操作:
+  1. 删除多语言
+  2. 删除多人联机
+  3. 删除HavenM
+  4. 完全删除BepInEX框架及其附属插件
+" 
+$yesRun = Read-Host -Prompt "直接按 回车键 则取消执行，按 对应数字序号 并回车 执行对应操作:>"
+if ($yesRun  -eq "1") { $temp_ = Remove-MLang }
+if ($yesRun  -eq "2") { $temp_ = Remove-RavenMCN }
+if ($yesRun  -eq "3") { 
+  $temp_ = Remove-HavenM
+  Write-Output "主模块无法自动删除, 请在Steam校验游戏文件完整性来卸载本体, 或参见网站" 
 }
-else  #错误处理
-{
-  Write-Host "无法获取Steam安装路径"
-  Exit-IScript
-}
+elseif ($yesRun  -eq "4") { $temp_ = Remove-BepInEX }
+Exit-IScript

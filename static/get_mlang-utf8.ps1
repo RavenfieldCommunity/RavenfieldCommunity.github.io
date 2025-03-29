@@ -31,11 +31,11 @@ function Apply-Translator {
   $translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
   
   if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true ) {
-    Write-Host "已经安装XUnity.AutoTranslator，跳过"
+    Write-Host "已经安装 XUnity.AutoTranslator, 跳过"
     return $true 
   }
   else {
-    Write-Host "正在下载XUnity.AutoTranslator ($($translatorInfo))..." 
+    Write-Host "正在下载 XUnity.AutoTranslator ($($translatorInfo)) ..." 
     if ( $global:isAlreadyInstalledBepInEX -eq $false ) { Start-Sleep -Seconds 10 }  #api只能10s调用一次，下载太快了
     #创建session并使用直链api请求文件
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -65,7 +65,7 @@ function Apply-Translator {
       }
       if ($? -eq $true) {
         $hash_ = (Get-FileHash $translatorDownloadPath -Algorithm SHA256).Hash
-        Write-Host "下载的XUnity.AutoTranslator的Hash: $hash_"
+        Write-Host "下载的 XUnity.AutoTranslator 的Hash: $hash_"
         if ($hash_ -eq $translatorHash){ 
           Expand-Archive -Path $translatorDownloadPath -DestinationPath $global:gamePath -Force
           if ($_ -eq $null) {
@@ -78,12 +78,12 @@ function Apply-Translator {
           }
         }
         else { 
-          Write-Warning "下载的XUnity.AutoTranslator校验不通过或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
+          Write-Warning "下载的 XUnity.AutoTranslator 校验不通过或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
           return $false
         }
       }
       else {
-          Write-Warning "XUnity.AutoTranslator下载失败，请反馈或重新下载"        
+          Write-Warning "XUnity.AutoTranslator 下载失败，请反馈或重新下载"        
         retrun $false
       }
    }

@@ -53,7 +53,7 @@ function Apply-RavenMCN {
   -ContentType "application/json;charset=utf-8"
   if ($? -eq $true) {
   $json_ = $request_.Content | ConvertFrom-Json
-  Write-Host "正在下载RavenMCN ($($json_.name))..."
+  Write-Host "正在下载 RavenMCN ($($json_.name)) ..."
   $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
   -WebSession $session `
   -OutFile $ravenmCNDownloadPath `
@@ -72,30 +72,30 @@ function Apply-RavenMCN {
   } `
   -ContentType "application/zip"
   if ($? -eq $true) {
-  Write-Host "RavenMCN已下载"   
+  Write-Host "RavenMCN 已下载"   
 		if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	  Read-Host "更新需要关闭游戏，请按 回车键 继续 >"
+	  Read-Host "更新需要关闭游戏，请按 回车键 继续:>"
 		taskkill /f /im ravenfield.exe
   Wait-Process -Name "ravenfield" -Timeout 10
   }	
   Expand-Archive -Path $ravenmCNDownloadPath -DestinationPath "$global:gamePath\BepInEx\plugins" -Force
   if ($? -eq $true) {
-    Write-Host "RavenMCN已安装"     
+    Write-Host "RavenMCN 已安装"     
     return $true 
   }
   else {
-    Write-Warning "RavenMCN安装失败"
+    Write-Warning "RavenMCN 安装失败"
     return $false 
   }
   }
   else 
   { 
-    Write-Warning "RavenMCN下载失败或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
+    Write-Warning "RavenMCN 下载失败或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
     return $false
   }   
   }
   else {
-  Write-Warning "无法获取RavenMCN信息或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
+  Write-Warning "无法获取 RavenMCN 信息或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
   return $false 
   }
 }

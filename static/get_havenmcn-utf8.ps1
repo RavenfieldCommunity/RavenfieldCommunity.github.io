@@ -46,11 +46,11 @@ function Apply-HavenM {
    }
     if ($? -eq $true) {
       if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	    Read-Host "更新需要关闭游戏，请按 回车键 继续 >"
+	    Read-Host "更新需要关闭游戏，请按 回车键 继续:>"
 		taskkill /f /im ravenfield.exe
         Wait-Process -Name "ravenfield" -Timeout 10
       }	
-	  Write-Host "正在安装 HavenM..."
+	  Write-Host "正在安装 HavenM ..."
       Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
       if ($? -ne $true) {
         Write-Warning "HavenM 安装失败" 

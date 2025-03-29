@@ -28,7 +28,7 @@ Write-Host "下载目录：$folderPath"
 
 #定义函数
 function Download-RavenMCN {
-  Write-Host "正在下载文件..." 
+  Write-Host "正在下载文件 ..." 
   #创建session并使用直链api请求文件
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
@@ -92,7 +92,7 @@ function CheckAndRunLocal-RavenMCN {
   if ($hash -eq $ravenMCNUrlHash) 
   { 
     #解压
-    Write-Host "正在启动文件..."
+    Write-Host "正在启动文件 ..."
     Expand-Archive $zipPath -DestinationPath $folderPath -Force
     #运行   
     if ($_ -eq $null) { Start-Process $exePath } else { return $false }
@@ -109,7 +109,7 @@ function CheckAndRunLocal-RavenMCN {
 }
 
 function UpdateLocal-RavenMCN {
-  Write-Host "重新下载安装文件，下次启动时生效..."
+  Write-Host "重新下载安装文件，下次启动时生效 ..."
   Download-RavenMCN
 }
 
@@ -135,8 +135,8 @@ function Exit-IScript
 #主代码
 if ( (Test-Path -Path $zipPath) -eq $true)
 {
-  Write-Host "本地存在安装文件，是否直接运行？" 
-  $yesRun = Read-Host -Prompt "按 回车键 则直接运行本地安装文件，按 任意键并回车 则重新下载>"
+  Write-Host "本地存在安装文件, 是否直接运行？" 
+  $yesRun = Read-Host -Prompt "按 回车键 则直接运行本地安装文件，按 任意键并回车 则重新下载:>"
   if ($yesRun  -eq "")
   {
     $result_ = CheckAndRunLocal-RavenMCN

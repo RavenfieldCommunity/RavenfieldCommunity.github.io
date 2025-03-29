@@ -54,7 +54,7 @@ def QuitScript():
 def ApplyBepInEX():
     #已安装测试
     if ( os.path.exists(GetGamePath() + 'winhttp.dll') ):
-        print('已经安装BepInEX, 跳过')
+        print('已经安装 BepInEX, 跳过')
         return
     header = { #header
         'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0',
@@ -76,7 +76,7 @@ def ApplyBepInEX():
         'upgrade-insecure-requests':'1',
         'Cookie':'PHPSESSID=api.leafone.cn'
     }
-    print('正在下载BepInEX (%s)...' %(bepInEXInfo))
+    print('正在下载 BepInEX (%s) ...' %(bepInEXInfo))
     #下载
     request1 = urllib.request.Request('https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/%s&type=down' %(bepInEXUrlID),headers=header)
     response1 = urllib.request.urlopen(request1)
@@ -92,15 +92,15 @@ def ApplyBepInEX():
             break
     file.close()
     #解压
-    print('BepInEX已下载')
-    print('下载的BepInEX的Hash: %s' %(hashObject.hexdigest()) )
+    print('BepInEX 已下载')
+    print('下载的 BepInEX 的Hash: %s' %(hashObject.hexdigest()) )
     if (hashObject.hexdigest() == bepInEXHash):
         #解压
         zipFile = zipfile.ZipFile(bepInEXDownlaodPath)
         zipFile.extractall(GetGamePath())
-        print('BepInEX已安装')
+        print('BepInEX 已安装')
     else:
-        print('下载的BepInEX校验不通过, 请反馈或重新下载或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本), 或更换网络环境')
+        print('下载的 BepInEX 校验不通过, 请反馈或重新下载或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本), 或更换网络环境')
         QuitScript()
 
 
@@ -113,7 +113,7 @@ def ApplyRavenMCN():
     request1 = urllib.request.Request(ravenmCNUrl,headers=header)
     response1 = urllib.request.urlopen(request1)
     response1Json = json.loads(response1.read().decode())
-    print('正在下载RavenMCN (%s)...' %(response1Json['name']) )
+    print('正在下载 RavenMCN (%s) ...' %(response1Json['name']) )
     header = {
         'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/195.0.0.0 Safari/537.36 Edg/175.0.0.0',
         'method':'GET',
@@ -137,20 +137,20 @@ def ApplyRavenMCN():
     file = open(ravenmCNDownlaodPath, 'wb')
     file.write(response2.read())
     file.close()
-    print('RavenMCN已下载')
+    print('RavenMCN 已下载')
     zipFile = zipfile.ZipFile(ravenmCNDownlaodPath)
     zipFile.extractall(GetGamePath() + 'BepInEx/plugins/')
-    print('RavenMCN已安装')
+    print('RavenMCN 已安装')
 
 
 ###main program
 ##系统检测
 if sys.platform == 'darwin':
-    print('本机为 Mac平台')
+    print('本机为 Mac 平台')
     PrintWarning('Mac平台可能无法正常运行此脚本, 任何问题请反馈!')
     isMacos = True
 elif sys.platform == 'linux':
-    print('本机为 Linux平台')
+    print('本机为 Linux 平台')
     isMacos = False
 else:
     PrintWarning('未知平台, 无法继续安装')
