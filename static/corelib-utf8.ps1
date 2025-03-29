@@ -186,6 +186,7 @@ function Exit-IScript {
   Exit-IScript;
 }
 
+
 #通过解析的libraryfolders获取游戏安装的库位置
 function Get-GameLibPath {
   #使用方式1
@@ -245,12 +246,9 @@ function Get-GameLibPath {
   
   #使用方式4
   Write-Host "使用方式4 Using Method4 ..." 
+  start "steam://launch/636480/dialog"
   $temp_ = Read-Host -Prompt "为了获取游戏安装路径, 请在手动启动游戏后, 按 回车键 继续 To get the game install path,please start game by yourself, then press Enter:>";
   $result_ = Split-Path -Path (Get-Process ravenfield | Select-Object Path)[0].Path;
-  #if ($? -eq $true)
-  #{
-  #	  start "steam://launch/636480/dialog"
-  #}
   if ( (Test-Path $result_) -eq $true )
   {
 	$global:gamePath = result_;  #游戏本体位置
@@ -260,8 +258,138 @@ function Get-GameLibPath {
   return $null;
 }
 
+function Apply-BepInEXCN {
+  $bepInEXUrlID = "iMcD41xbcqgf"
+  $bepInEXInfo = "5.4.22 for x64"
+  $bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
+  $bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
+  
+  if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
+  {
+    Write-Host "已经安装BepInEX，跳过"
+	$global:isAlreadyInstalledBepInEX = $true
+	return $true
+  }
+  else
+  {
+    Write-Host "正在下载BepInEX ($($bepInEXInfo))..." 
+    #创建session并使用直链api请求文件
+    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+    $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
+    $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down" `
+      -WebSession $session `
+      -OutFile $bepInEXDownloadPath `
+      -Headers @{
+        "authority"="api.leafone.cn"
+        "method"="GET"
+        "path"="/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down"
+        "scheme"="https"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+        "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+        "priority"="u=0, i"
+        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
+        "sec-ch-ua-mobile"="?0"
+        "sec-ch-ua-platform"="`"Windows`""
+        "sec-fetch-dest"="document"
+        "sec-fetch-mode"="navigate"
+        "sec-fetch-site"="none"
+        "sec-fetch-user"="?1"
+        "upgrade-insecure-requests"="1"
+      }
+      if ($? -eq $true)  #无报错就校验并解压
+      {
+        $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
+        Write-Host "下载的BepInEX的Hash: $hash_"
+        if ($hash_ -eq $bepInEXHash) 
+        { 
+          Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Force  #强制覆盖
+          if ($? -eq $true) {
+            Write-Host "BepInEX已安装"           
+            return $true 
+          }
+          else { #错误处理
+           Write-Warning "BepInEX安装失败"
+           return $false 
+          }
+        }
+        else #错误处理
+        { 
+          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
+          return $false
+        }
+      }
+      else #错误处理
+      {
+          Write-Warning "BepInEX下载失败，请反馈或重新下载"        
+        retrun $false
+      }
+   }
+}
+
+function Apply-BepInEXGithub {
+  #如果已经安装就跳过
+  if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true ) {
+    Write-Host "BepInEX is already installed, skip"
+  }
+  else {
+    Write-Host "Downloading BepInEX (5.4.22 for x64)..." 
+	$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip" `
+      -WebSession $session `
+      -OutFile $bepInEXDownloadPath `
+      -Headers @{
+        "method"="GET"
+        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+        "accept-encoding"="gzip, deflate, br, zstd"
+    }
+      if ($? -eq $true)  #无报错就校验并解压
+      {
+	    Write-Host "BepInEX downloaded"  
+        Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Forc
+        if ($? -eq $true) {
+            Write-Host "BepInEX installed"           
+        }
+        else { 
+           Write-Warning "BepInEX install failed"
+        }
+      }
+      else #错误处理
+      { 
+        Write-Warning "BepInEX install failed"
+      }
+    }
+}
 
 ###主程序
+#可用的global var:
+# $? 操作是否成功
+# $global:gameLibPath 游戏安装的steam库的位置
+# $global:gamePath 游戏本体位置
+# $global:downloadPath 统一下载位置
+#可用func:
+# Apply-BepInEXGithub
+# Apply-BepInEXCN
+#路径默认结尾无斜杠
+#func报错在主线程手动处理
+#统一initer:
+<#
+$w=(New-Object System.Net.WebClient);
+$w.Encoding=[System.Text.Encoding]::UTF8;
+$global:corelibSrc = $null
+$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
+if ( $global:corelibSrc -eq $null ) {
+  $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
+}
+if ( $global:corelibSrc -eq $null ) {
+  Write-Warning "无法初始化依赖库 Cannot init corelib";
+  Exit-IScript;
+}
+else { iex $global:corelibSrc; }
+#>
+
 Write-Host "初始化环境 Initing env ...";
 
 #32位检测
@@ -274,10 +402,9 @@ if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath
 #测试与打印下载目录
 Write-Host "下载目录 Download path: $downloadPath";
 
-#初始化变量
+#初始化vdf
 #仅需要再次读写的变量才加上Global标志
 $vdf = [VdfDeserializer]::new();  #初始化VDF解析器
-$global:RFCCoreLibInited = $true; #是否加载了此远程ps脚本
 $global:gameLibPath = ""; #游戏安装的steam库的位置
 if ($global:gamePath -eq $null) { $global:gamePath = ""; }  #游戏本体位置
 

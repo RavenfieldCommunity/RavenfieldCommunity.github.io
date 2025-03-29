@@ -12,103 +12,29 @@ function Exit-IScript {
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
-try { iex($w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1')); }
-catch { 
-    iex($w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1')); 
-	if ($? -eq $true)
-	{
-		Write-Warning "无法初始化依赖库";
-		Exit-IScript;
-	}
+$global:corelibSrc = $null
+$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
+if ( $global:corelibSrc -eq $null ) {
+  $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
 }
-
-#初始化变量
-#仅需要再次读写的变量才加上Global标志
-$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"   #BepInEX下载到的本地文件
-$translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
-#定义下载链接与文件hash
-$bepInEXUrlID = "iMcD41xbcqgf"
-$bepInEXInfo = "5.4.22 for x64"
-$bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
-$translatorUrlID = "iNKGb1xbf8ze"
-$translatorInfo = "5.3.0"
-$translatorHash = "E9D2C514408833D516533BCC96E64C246140F6A8579A5BC4591697BB8D16DEE3"
-$global:isAlreadyInstalledBepInEX = $false #是否已经安装bepinex
-
-function DownloadAndApply-BepInEX {
-  if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
-  {
-    Write-Host "已经安装BepInEX，跳过"
-	$global:isAlreadyInstalledBepInEX = $true
-    return $true 
-  }
-  else
-  {
-    Write-Host "正在下载BepInEX ($($bepInEXInfo))..." 
-    #创建session并使用直链api请求文件
-    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-    $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down" `
-      -WebSession $session `
-      -OutFile $bepInEXDownloadPath `
-      -Headers @{
-        "authority"="api.leafone.cn"
-        "method"="GET"
-        "path"="/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down"
-        "scheme"="https"
-        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-        "accept-encoding"="gzip, deflate, br, zstd"
-        "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-        "priority"="u=0, i"
-        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
-        "sec-ch-ua-mobile"="?0"
-        "sec-ch-ua-platform"="`"Windows`""
-        "sec-fetch-dest"="document"
-        "sec-fetch-mode"="navigate"
-        "sec-fetch-site"="none"
-        "sec-fetch-user"="?1"
-        "upgrade-insecure-requests"="1"
-      }
-      if ($? -eq $true)  #无报错就校验并解压
-      {
-        $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
-        Write-Host "下载的BepInEX的Hash: $hash_"
-        if ($hash_ -eq $bepInEXHash) 
-        { 
-          Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Force  #强制覆盖
-          if ($_ -eq $null) {
-            Write-Host "BepInEX已安装"           
-            return $true 
-          }
-          else { #错误处理
-           Write-Warning "BepInEX安装失败"
-           return $false 
-          }
-        }
-        else #错误处理
-        { 
-          Write-Warning "下载的BepInEX校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
-          return $false
-        }
-      }
-      else #错误处理
-      {
-          Write-Warning "BepInEX下载失败，请反馈或重新下载"        
-        retrun $false
-      }
-   }
+if ( $global:corelibSrc -eq $null ) {
+  Write-Warning "无法初始化依赖库";
+  Exit-IScript;
 }
+else { iex $global:corelibSrc; }
 
-function DownloadAndApply-Translator {
-  if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true )
-  {
+function Apply-Translator {
+  #定义下载链接与文件hash
+  $translatorUrlID = "iNKGb1xbf8ze"
+  $translatorInfo = "5.3.0"
+  $translatorHash = "E9D2C514408833D516533BCC96E64C246140F6A8579A5BC4591697BB8D16DEE3"
+  $translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
+  
+  if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true ) {
     Write-Host "已经安装XUnity.AutoTranslator，跳过"
     return $true 
   }
-  else
-  {
+  else {
     Write-Host "正在下载XUnity.AutoTranslator ($($translatorInfo))..." 
     if ( $global:isAlreadyInstalledBepInEX -eq $false ) { Start-Sleep -Seconds 10 }  #api只能10s调用一次，下载太快了
     #创建session并使用直链api请求文件
@@ -137,12 +63,10 @@ function DownloadAndApply-Translator {
         "sec-fetch-user"="?1"
         "upgrade-insecure-requests"="1"
       }
-      if ($? -eq $true)
-      {
+      if ($? -eq $true) {
         $hash_ = (Get-FileHash $translatorDownloadPath -Algorithm SHA256).Hash
         Write-Host "下载的XUnity.AutoTranslator的Hash: $hash_"
-        if ($hash_ -eq $translatorHash) 
-        { 
+        if ($hash_ -eq $translatorHash){ 
           Expand-Archive -Path $translatorDownloadPath -DestinationPath $global:gamePath -Force
           if ($_ -eq $null) {
             Write-Host "XUnity.AutoTranslator已安装"           
@@ -153,14 +77,12 @@ function DownloadAndApply-Translator {
            return $false 
           }
         }
-        else 
-        { 
+        else { 
           Write-Warning "下载的XUnity.AutoTranslator校验不通过或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
           return $false
         }
       }
-      else
-      {
+      else {
           Write-Warning "XUnity.AutoTranslator下载失败，请反馈或重新下载"        
         retrun $false
       }
@@ -172,13 +94,12 @@ function Apply-MLang {
   $file1 = "$global:gameLibPath\steamapps\workshop\content\636480\3237432182\main_extra-sch.txt"
   $file2 = "$global:gameLibPath\steamapps\workshop\content\636480\3237432182\main-sch.txt"
   $targetPath = "$global:gamePath\BepInEX\Translation\en\Text"
-  if ( (Test-Path -Path $file1) -eq $true ) #如果文件存在
-  {
+  #如果文件存在
+  if ( (Test-Path -Path $file1) -eq $true ) {
     Write-Host "已经订阅翻译文件"
     if ( (Test-Path -Path $targetPath) -ne $true ) { mkdir $targetPath }  #如果目标目录不存在则新建
-
-    if ($? -eq $true)  #如果目录创建成功
-    {
+    #如果目录创建成功
+    if ($? -eq $true) {
       #1
       Copy-Item -Path $file1 -Destination $targetPath -Force
       if ($? -ne $true) { Write-Warning "导入翻译文件 main_extra-sch 失败" } else { Write-Host "导入翻译文件 main_extra-sch 成功" }
@@ -193,15 +114,15 @@ function Apply-MLang {
       Write-Host "导入翻译文件成功" 
       return $true
     }
-    else  #错误处理
-    {
+	#错误处理
+    else {
       Write-Warning "创建目录失败"      
     }
-  }
-  else  #错误处理
-  {
+    #错误处理
+  else {
     Write-Warning "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
     return $false
+  }
   }
 }
 
@@ -217,9 +138,7 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 # 当前最新版为 Update 2 (202412272000)
 "
 
-if ([Environment]::Is32BitOperatingSystem) { Write-Warning "可能不支持本机的32位系统，需要手动安装!";}
-
-if ( (DownloadAndApply-BepInEX) -ne $true) { Exit-IScript }  #如果失败就exit
-if ( (DownloadAndApply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
+if ( (Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
+if ( (Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
 $result_ = Apply-MLang
 Exit-IScript

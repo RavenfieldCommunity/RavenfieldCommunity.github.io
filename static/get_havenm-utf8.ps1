@@ -8,18 +8,39 @@ function Exit-IScript {
   Exit-IScript;
 }
 
+$w=(New-Object System.Net.WebClient);
+$w.Encoding=[System.Text.Encoding]::UTF8;
+
+if ((Get-Culture).Name -eq "zh-CN")  #中文重定向
+{
+  Write-Host "是否重定向脚本至中文语言? Redirect script to Chinese?"
+  $yesRun = Read-Host -Prompt "按 回车键 确定，按 任意键并回车 取消操作 Press Enter to continue, press any keys and Enter to ignore:>"
+  if ($yesRun  -eq "") {
+	$global:redirectSrc = $null
+    $global:redirectSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/get_havenmcn-utf8.ps1');
+    if ($? -eq $true) {
+    $global:redirectSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/get_havenmcn-utf8.ps1'); 
+	}
+	if ($global:redirectSrc -eq $null) {
+		Write-Warning "重定向失败，使用原脚本";
+	}
+	else { iex $global:redirectSrc; }
+  }
+}
+
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
-try { iex($w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1')); }
-catch { 
-    iex($w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1')); 
-	if ($? -eq $true)
-	{
-		Write-Warning "Cannot init corelib";
-		Exit-IScript;
-	}
+$global:corelibSrc = $null
+$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
+if ( $global:corelibSrc -eq $null ) {
+	$global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
 }
+if ( $global:corelibSrc -eq $null ) {
+	Write-Warning "Cannot init corelib";
+	Exit-IScript;
+}
+else { iex $global:corelibSrc; }
 
 #创建session
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
@@ -28,14 +49,13 @@ $session.Cookies.Add((New-Object System.Net.Cookie("user_session", "000-", "/", 
 
 function Apply-HavenM {
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/RavenfieldCommunity/HavenM/releases/latest" `
-        -WebSession $session `
-        -Headers @{
-          "Accept"="application/json, text/plain, */*"
-          "Accept-Encoding"="gzip, deflate, br, zstd"
-        } `
-        -ContentType "application/json;charset=utf-8"
-  if ($? -eq $true)
-  {
+    -WebSession $session `
+    -Headers @{
+      "Accept"="application/json, text/plain, */*"
+      "Accept-Encoding"="gzip, deflate, br, zstd"
+    } `
+    -ContentType "application/json;charset=utf-8"
+  if ($? -eq $true) {
     $json_ = $request_.Content | ConvertFrom-Json
 	Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
 	Write-Host "Update Note: 
@@ -51,59 +71,25 @@ $($json_.body)
     -Headers @{
     "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
     "accept-encoding"="gzip, deflate, br, zstd"
-   }
-    if ($? -eq $true)  #无报错就apply
-    {
-      if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	    Read-Host "Need to close game, press Enter to continue >"
-		taskkill /f /im ravenfield.exe
-        Wait-Process -Name "ravenfield" -Timeout 10
-      }	
-	  Write-Host "Installing HavenM..."
-      Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
-      if ($? -ne $true) {
-        Write-Warning "Install HavenM failed" 
-      } else  { Write-Host "HavenM installed" }
     }
-    else #错误处理
-    {
-      Write-Warning "Download HavenM failed"        
-    }
-}
-
-function Apply-BepInEX {
-  if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
-  {
-    Write-Host "BepInEX is already installed, skip"
+	#无报错就apply
+  if ($? -eq $true) {
+    if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
+	  Read-Host "Need to close game, press Enter to continue >"
+	  taskkill /f /im ravenfield.exe
+      Wait-Process -Name "ravenfield" -Timeout 10
+    }	
+    Write-Host "Installing HavenM..."
+    Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
+    if ($? -ne $true) {
+      Write-Warning "Install HavenM failed" 
+    } 
+    else { Write-Host "HavenM installed" }
   }
-  else
-  {
-    Write-Host "Downloading BepInEX (5.4.22 for x64)..." 
-	$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip" `
-      -WebSession $session `
-      -OutFile $bepInEXDownloadPath `
-      -Headers @{
-        "method"="GET"
-        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-        "accept-encoding"="gzip, deflate, br, zstd"
-      }
-      if ($? -eq $true)  #无报错就校验并解压
-      {
-	    Write-Host "BepInEX downloaded"  
-        Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Forc
-        if ($? -eq $true) {
-            Write-Host "BepInEX installed"           
-        }
-        else { 
-           Write-Warning "BepInEX install failed"
-        }
-      }
-      else #错误处理
-      { 
-        Write-Warning "BepInEX install failed"
-      }
-    }
+  #错误处理
+  else {
+    Write-Warning "Download HavenM failed"        
+  }
 }
 
 function Apply-ACUpdater {
@@ -129,26 +115,26 @@ function Apply-ACUpdater {
   }
   
   Write-Host "Downloading ACUpdater ..." 
-	$acUpdaterDownloadPath = "$global:downloadPath\HavenM.ACUpdater.zip"
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/ACUpdaterRelease/HavenM.ACUpdater.dll" `
-        -WebSession $session `
-		-OutFile $acUpdaterDownloadPath `
-        -Headers @{
-        "method"="GET"
-        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-        "accept-encoding"="gzip, deflate, br, zstd"
-      }
+  $acUpdaterDownloadPath = "$global:downloadPath\HavenM.ACUpdater.zip"
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/ACUpdaterRelease/HavenM.ACUpdater.dll" `
+    -WebSession $session `
+    -OutFile $acUpdaterDownloadPath `
+    -Headers @{
+      "method"="GET"
+      "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+      "accept-encoding"="gzip, deflate, br, zstd"
+  }
+  if ($? -eq $true) {
+    Write-Host "Installing ACUpdater ..."   	
+    if ( (Test-Path "$global:gamePath\BepInEx\plugins") -ne $true ) { mkdir "$global:gamePath\BepInEx\plugins" }
+    Copy-Item $acUpdaterDownloadPath  "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll" -Force
     if ($? -eq $true) {
-      Write-Host "Installing ACUpdater ..."   	
-      if ( (Test-Path "$global:gamePath\BepInEx\plugins") -ne $true ) { mkdir "$global:gamePath\BepInEx\plugins" }
-      Copy-Item $acUpdaterDownloadPath  "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll" -Force
-      if ($? -eq $true) {
-        Write-Host "ACUpdater installed"           
-      }
-      else {
-        Write-Warning "Install ACUpdater failed"
-      }
+      Write-Host "ACUpdater installed"           
     }
+    else {
+      Write-Warning "Install ACUpdater failed"
+    }
+  }
 }
 
 
@@ -156,18 +142,17 @@ function Apply-ACUpdater {
 Write-Host "# HavenM Installation script
 # The project is made by Stand_Up
 # Installation script is made by Github@RavenfieldCommunity
-# Discord server: ?
+# Discord server: Not provided
 # Refer: https://github.com/RavenfieldCommunity/HavenM
 # Refer: https://ravenfieldcommunity.github.io/docs/en/Projects/havenm.html
 
 
-#Tip: Re-installing enquals updating
-#Tip: This script will install updater plugin!
-#提示: 中国玩家请使用上面网站提供的命令安装HavenM(可能未完工)!
+# Tip: Re-installing enquals updating
+# Tip: This script will install updater plugin!
 "
 if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
-Apply-BepInEX
+Apply-BepInEXGithub
 Apply-ACUpdater
 if ( $isUpdate -eq $ture ) { 
   if ( $(tasklist | findstr "steam.exe") -ne $null ) { 
