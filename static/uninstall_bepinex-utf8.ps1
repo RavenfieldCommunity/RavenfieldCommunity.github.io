@@ -110,7 +110,8 @@ if ($yesRun  -eq "1") { $temp_ = Remove-MLang }
 if ($yesRun  -eq "2") { $temp_ = Remove-RavenMCN }
 if ($yesRun  -eq "3") { 
   $temp_ = Remove-HavenM
-  Write-Output "主模块无法自动删除, 请在Steam校验游戏文件完整性来卸载本体, 或参见网站" 
+  Write-Output "正在调用Steam修补游戏文件 ..." 
+  start "steam://validate/636480"
 }
 elseif ($yesRun  -eq "4") { $temp_ = Remove-BepInEX }
 Exit-IScript

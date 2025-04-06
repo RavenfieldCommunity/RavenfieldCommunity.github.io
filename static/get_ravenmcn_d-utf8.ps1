@@ -1,6 +1,14 @@
 #RF RavenM联机插件 直接安装脚本
 #感谢: api.leafone.cn
 
+#退出脚本递归
+function Exit-IScript {
+  Read-Host "您现在可以关闭窗口了"
+  Exit
+  Exit-IScript
+}
+
+
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
@@ -74,7 +82,7 @@ function Apply-RavenMCN {
   if ($? -eq $true) {
   Write-Host "RavenMCN 已下载"   
 		if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	  Read-Host "更新需要关闭游戏，请按 回车键 继续:>"
+	  Read-Host "需要关闭游戏，请按 回车键 继续:>"
 		taskkill /f /im ravenfield.exe
   Wait-Process -Name "ravenfield" -Timeout 10
   }	
@@ -100,14 +108,6 @@ function Apply-RavenMCN {
   }
 }
 
-#退出脚本递归
-function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了"
-  Exit
-  Exit-IScript
-}
-
-
 ###主程序
 Write-Host "# RavenM联机插件 直接安装脚本
 # RavenM国内版 由 Ravenfield贴吧@Aya 维护
@@ -120,3 +120,4 @@ Write-Host "# RavenM联机插件 直接安装脚本
 "
 if ( (Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
 $temp_ = Apply-RavenMCN
+Exit-IScript

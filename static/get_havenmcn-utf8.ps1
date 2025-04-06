@@ -31,7 +31,7 @@ function Apply-HavenM {
   Write-Host "更新日志请至Github查看"
   #下载
   $havenMDownloadPath = "$global:downloadPath\HavenM.zip"
-  Write-Host "正在下载 HavenM ..." 
+  Write-Host "正在下载 HavenM (约3600000B或3.6MB) ..." 
   $global:downloadUrl = $null
   Write-Host "是否使用KGithub加速?"
   $yesRun = Read-Host -Prompt "按 任意键并回车 确定，直接回车取消使用加速:>"
@@ -86,9 +86,9 @@ if ( $(tasklist | findstr "Steamcommunity_302.exe") -eq $null ) {
     }
   }
 }
-if ( $isUpdate -eq $true ) { Write-Host "正在更新 HavenM ..." }
+if ( $isUpdate -ne $null ) { Write-Host "正在更新 HavenM ..." }
 Apply-HavenM
-if ( $isUpdate -eq $ture ) { 
+if ( $isUpdate -ne $null ) { 
   if ( $(tasklist | findstr "steam.exe") -ne $null ) { 
     Write-Host "正在重新启动游戏 ..."
     start "steam://launch/636480/dialog"

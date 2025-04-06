@@ -75,7 +75,7 @@ $($json_.body)
 	#无报错就apply
   if ($? -eq $true) {
     if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	  Read-Host "Need to close game, press Enter to continue >"
+	  Read-Host "Need to close game, press Enter to continue:>"
 	  taskkill /f /im ravenfield.exe
       Wait-Process -Name "ravenfield" -Timeout 10
     }	
@@ -150,11 +150,11 @@ Write-Host "# HavenM Installation script
 # Tip: Re-installing enquals updating
 # Tip: This script will install updater plugin!
 "
-if ( $isUpdate -eq $true ) { Write-Host "Updating HavenM ..." }
+if ( $isUpdate -ne $null ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
 Apply-BepInEXGithub
 Apply-ACUpdater
-if ( $isUpdate -eq $ture ) { 
+if ( $isUpdate -ne $null ) { 
   if ( $(tasklist | findstr "steam.exe") -ne $null ) { 
     Write-Host "Relaunch game ..."
     start "steam://launch/636480/dialog"
