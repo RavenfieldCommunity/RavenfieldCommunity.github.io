@@ -35,7 +35,7 @@ fi
 
 #是否为ARM
 isArm=0
-elif [ $(uname -m) == "i386" ]; then
+if [ $(uname -m) == "i386" ]; then
   PrintWarning "ARM架构可能不兼容插件框架";
   isArm=1
 fi
@@ -119,7 +119,7 @@ function ApplyBepinEX() {
     if (( $useProton != 0 && $useProton != 1)); then
       CatchError "无效输入"
     fi
-  elif
+  else
     return;
   fi
 
@@ -151,53 +151,55 @@ function ApplyBepinEX() {
   fi
 	
   #校验
-  echo "BepInEX已下载"
-  if (($? != 0)); then
+  echo "BepInEX 已下载"
+  if (($isMacos == 0)); then
     echo $fileHash $bepinexDownloadPath | sha256sum -c --strict --quiet
   else
-    echo $fileHash $bepinexDownloadPath | shasum -a 256 -c -s 
+    echo $fileHash $bepinexDownloadPath > hash.txt
+	shasum -a 256 hash.txt -c -s 
   fi
   if (($? != 0)); then
    CatchError "BepInEX 校验不通过, 请反馈或稍后重试"
   fi
 	
   #unzip
-  echo "BepInEX校验通过"
+  echo "BepInEX 校验通过"
   unzip -o $bepinexDownloadPath -d $gamePath 
   if (($? != 0)); then
     CatchError "BepInEX 安装失败" 
   fi
-  echo "BepInEX已安装"
+  echo "BepInEX 已安装"
   
   #配置1
+  mv $gamePath/run_bepinex.sh $gamePath/run_bepinex.sh.txt
   if (($isMacos == 1)); then
-    sed '/executable_name=""/a\executable_name="Ravenfield.app"' "$gamePath/run_bepinex.sh" > "$gamePath/run_bepinex.sh"
+    sed '/executable_name=""/a\executable_name="Ravenfield.app"' $gamePath/run_bepinex.sh.txt > $gamePath/run_bepinex.sh
   else
-    sed '/executable_name=""/a\executable_name="Ravenfield.x86_64"' "$gamePath/run_bepinex.sh" > "$gamePath/run_bepinex.sh"
+    sed '/executable_name=""/a\executable_name="Ravenfield.x86_64"' $gamePath/run_bepinex.sh.txt > $gamePath/run_bepinex.sh
   fi
   if (($? == 0)); then
     echo "BepInEX 已配置"
   else 
-    PrintWarning "BepInEX 配置失败, 可能需要手动配置, 请打开游戏目录并依据 `https://docs.bepinex.dev/` 检查 `run_bepinex.sh` 文件"
+    PrintWarning "BepInEX 配置失败, 可能需要手动配置, 请打开游戏目录并依据 https://docs.bepinex.dev/ 检查 run_bepinex.sh 文件"
   fi
   
   #配置2
-  chmox u+x $gamePath/run_bepinex.sh
+  chmod u+x $gamePath/run_bepinex.sh
   if (($? == 0)); then
     echo "BepInEX执行脚本 已配置启动权限"
   else 
-    PrintWarning "BepInEX执行脚本 启动权限配置失败, 可能需要手动配置, 请打开游戏目录并依据 `https://docs.bepinex.dev/` 在终端配置 `run_bepinex.sh` "
+    PrintWarning "BepInEX执行脚本 启动权限配置失败, 可能需要手动配置, 请打开游戏目录并依据 https://docs.bepinex.dev 在终端配置 run_bepinex.sh "
   fi
   
   #arm配置
   if (($isArm == 1)); then
     echo "#!/bin/sh
 arch -x86_64 /bin/bash ./run_bepinex.sh" > $gamePath/RUN_ME.sh
-    chmox u+x $gamePath/RUN_ME.sh
+    chmod u+x $gamePath/RUN_ME.sh
 	if (($? == 0)); then
       echo "BepInEX ARM平台执行脚本 已配置启动权限"
     else 
-      PrintWarning "BepInEX执行ARM平台脚本 启动权限配置失败, 可能需要手动配置, 请打开游戏目录并依据 `https://docs.bepinex.dev/` 在终端配置 `RUN_ME.sh` "
+      PrintWarning "BepInEX执行ARM平台脚本 启动权限配置失败, 可能需要手动配置, 请打开游戏目录并依据 https://docs.bepinex.dev/ 在终端配置 RUN_ME.sh "
     fi
   fi
 }
@@ -237,22 +239,21 @@ ApplyBepinEX
 ApplyRavenMCN
 
 #最后步骤
-echo "安装已结束"
+echo "安装已结束 (以下步骤若已经执行过请忽略)"
 if (($isArm == 1)); then
   echo "从游戏目录执行脚本运行 BepInEX, 请执行脚本创建的 `RUN_ME.sh` 而不是 `run_bepinex.sh`"
 fi
 
 if (($useProton == 1)); then
-  echo "您使用了Windows兼容层, 若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
+  echo "您使用了Windows兼容层, 若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> 游戏属性 -> 高级启动参数, 或其他):
 WINEDLLOVERRIDES=\"winhttp.dll=n,b\" %command%"
-elif (($macos == 1)); then
+elif (($isMacos == 1)); then
   if (($isArm == 1)); then
-    echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
+    echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> 游戏属性 -> 高级启动参数, 或其他):
 \"$gamePath/RUN_ME.sh\" %command%"
-  else
   fi
 else
-  echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
+  echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> 游戏属性 -> 高级启动参数, 或其他):
 ./run_bepinex.sh %command%
 "
 fi
