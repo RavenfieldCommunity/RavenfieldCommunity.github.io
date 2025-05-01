@@ -8,13 +8,25 @@ function Exit-IScript {
   Exit-IScript;
 }
 
+
+function MLangWrite-Output ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+	else { Write-Output $en }
+}
+
+function MLangWrite-Warning ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+	else { Write-Output $en }
+}
+
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
 
 if ((Get-Culture).Name -eq "zh-CN")  #中文重定向
 {
-  Write-Host "是否重定向脚本至中文语言? Redirect script to Chinese?"
-  $yesRun = Read-Host -Prompt "按 回车键 确定，按 任意键并回车 取消操作 Press Enter to continue, press any keys and Enter to ignore:>"
+  MLangWrite-Output "是否重定向脚本至中文语言?" "Redirect script to Chinese?"
+  MLangWrite-Output "按 回车键 确定，按 任意键并回车 取消操作:>" "Press Enter to continue, press any keys and Enter to ignore:>"
+  $yesRun = Read-Host
   if ($yesRun  -eq "") {
 	$global:redirectSrc = $null
     $global:redirectSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/get_havenmcn-utf8.ps1');
@@ -57,10 +69,8 @@ function Apply-HavenM {
     -ContentType "application/json;charset=utf-8"
   if ($? -eq $true) {
     $json_ = $request_.Content | ConvertFrom-Json
-	Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
-	Write-Host "Update Note: 
-$($json_.body)
-	"
+	  Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
+    Write-Host "Please go to github to view the changelog"
   }
   #下载
   $havenMDownloadPath = "$global:downloadPath\HavenM.zip"
@@ -114,7 +124,7 @@ function Apply-ACUpdater {
 	}
   }
   
-  Write-Host "Downloading ACUpdater ..." 
+  Write-Host "Downloading ACUpdater (the plugin to auto-update HavenM) ..." 
   $acUpdaterDownloadPath = "$global:downloadPath\HavenM.ACUpdater.zip"
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/ACUpdaterRelease/HavenM.ACUpdater.dll" `
     -WebSession $session `

@@ -16,7 +16,7 @@ if ( $global:corelibSrc -eq $null ) {
   $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
 }
 if ( $global:corelibSrc -eq $null ) {
-  Write-Warning "无法初始化依赖库 Cannot init corelib";
+  MLangWrite-Warning "无法初始化依赖库" "Cannot init corelib";
   Exit-IScript;
 }
 else { iex $global:corelibSrc; }
@@ -28,12 +28,12 @@ function Remove-BepInEX {
   $file3 = "$global:gamePath\doorstop_config.ini"
   if ( (Test-Path -Path $file2) -eq $true ) #如果文件存在
   {
-    Write-Host "删除 BepInEX文件夹 (1/3) ..."
-	rm $file1 -Recurse
-	Write-Host "删除 winhttp.dll (2/3) ..."
-	rm $file2
-	Write-Host "删除 doorstop_config.ini (3/3) ..."
-	rm $file3
+    MLangWrite-Output "删除 BepInEX文件夹 (1/3) ..." "Deleting BepInEX文件夹 (1/3) ..."
+	  rm $file1 -Recurse
+	  MLangWrite-Output "删除 winhttp.dll (2/3) ..." "Deleting winhttp.dll (2/3) ..."
+	  rm $file2
+	  MLangWrite-Output "删除 doorstop_config.ini (3/3) ..." "Deleting winhttp.dll (2/3) ..."
+	  rm $file3
   }
   else  #错误处理
   {
@@ -69,8 +69,13 @@ function Remove-MLang {
 function Remove-RavenMCN {
   #定义文件位置
   $file1 = "$global:gamePath\BepInEx\plugins\RavenM.dll"   #如果文件存在
+  $file2 = "$global:gamePath\BepInEx\plugins\RavenM0.dll"   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true )  {
     Write-Host "删除 联机插件 (1/1) ..."
+	rm $file1
+  }
+  if ( (Test-Path -Path $file2) -eq $true )  {
+    Write-Host "删除 联机插件 (2/1) ..."
 	rm $file1
   }
   else {
@@ -83,35 +88,43 @@ function Remove-HavenM {
   #定义文件位置
   $file1 = "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll"   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true )  {
-    Write-Host "删除 自动更新服务 (1/1) ..."
+    MLangWrite-Output "删除 自动更新服务 (1/1) ..." "Deleting ACUpdater (1/1) ..."
 	rm $file1
   }
   else {
-    Write-Warning "未安装 自动更新服务"
+    MLangWrite-Output "未安装 自动更新服务" "ACUpdater is not installed"
     return $false
   }
+  $temp_ = Remove-HavenM
+  MLangWrite-Output "正在调用 Steam 修补游戏文件 ..." "Using Steam validate the game ..."
+  start "steam://validate/636480"
 }
 
 ###主程序
-Write-Host "# RF BepInEX插件 卸载脚本
+MLangWrite-Output "# RF BepInEX插件 卸载脚本
 # 卸载脚本 由 Github@RavenfieldCommunity 维护
 # 参见: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
 
 # 提示：报错请反馈！
+" "# RF BepInEX plugins uninstallation script
+# The script is made by Github@RavenfieldCommunity
+# Refer: https://ravenfieldcommunity.github.io/docs/cn/Project/mlang.html
+
+# Tip: if buggy, please feedback!
 "
-Write-Host "请选择操作:
+MLangWrite-Output "请选择操作:
   1. 删除多语言
-  2. 删除多人联机
+  2. 删除多人联机国内版
   3. 删除HavenM
   4. 完全删除BepInEX框架及其附属插件
+" "Choose action:
+  1. Delete MLang
+  2. Deletw RavenMCN
+  3. Delete HavenM
+  4. Competely detele BepInEX and plugins inside
 " 
 $yesRun = Read-Host -Prompt "直接按 回车键 则取消执行，按 对应数字序号 并回车 执行对应操作:>"
 if ($yesRun  -eq "1") { $temp_ = Remove-MLang }
 if ($yesRun  -eq "2") { $temp_ = Remove-RavenMCN }
-if ($yesRun  -eq "3") { 
-  $temp_ = Remove-HavenM
-  Write-Output "正在调用Steam修补游戏文件 ..." 
-  start "steam://validate/636480"
-}
 elseif ($yesRun  -eq "4") { $temp_ = Remove-BepInEX }
 Exit-IScript

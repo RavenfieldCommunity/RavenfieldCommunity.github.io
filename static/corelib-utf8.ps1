@@ -1,6 +1,6 @@
 #RF Powershell依赖lib
 #感谢: BartJolling/ps-steam-cmd
-#感谢: api.leafone.cn
+#感谢: api.leafone.cn 但是挂了
 
 ###module: VdfDeserializer 
 ##src: https://github.com/BartJolling/ps-steam-cmd
@@ -179,13 +179,31 @@ Class VdfTextReader {
 }
 ###end module
 
+function MLangWrite-Output ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+	else { Write-Output $en }
+}
+
+function MLangWrite-Warning ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+	else { Write-Output $en }
+}
+  
 #退出脚本递归，但必须在各ps脚本手动定义
 function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了 Now you can close this window";
+  MLangWrite-Output "您现在可以关闭窗口了" "Now you can close this window";
+  Read-Host;
   Exit;
   Exit-IScript;
 }
 
+
+$appID = 636480
+$bepInEXUrl = "https://ghproxy.net/https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip"
+$bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
+$bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
+$exeNameNoSubfix = "ravenfield"
+$bepInEXInfo = "5.4.22 for windows x64"
 
 #通过解析的libraryfolders获取游戏安装的库位置
 function Get-GameLibPath {
@@ -201,14 +219,14 @@ function Get-GameLibPath {
       $count = 0..$lowCount;
       foreach ($num in $count)  #手动递归
       {
-    	if ($parsedVdf."$num".apps.636480 -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
+    	if ($parsedVdf."$num".apps."$appID" -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
       }
       #错误处理
-      Write-Warning "方式1 无法获取游戏安装路径或未安装游戏 Method1 fail";
+      MLangWrite-Warning "方式1 无法获取游戏安装路径或未安装游戏" "Method1 fail";
     }
     else  #错误处理
     {
-      Write-Warning "方式1 无法获取Libraryfolders Method1 fail";
+      MLangWrite-Warning "方式1 无法获取Libraryfolders" "Method1 fail";
     }
   }
   
@@ -223,14 +241,14 @@ function Get-GameLibPath {
       $count = 0..$lowCount;
       foreach ($num in $count)  #手动递归
       {
-    	if ($parsedVdf."$num".apps.636480 -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
+    	if ($parsedVdf."$num".apps."$appID" -ne $null) { return $parsedVdf."$num".path.Replace('\\','\'); }
       }
       #错误处理
-    	Write-Warning "方式2 无法获取游戏安装路径或未安装游戏 Method2 fail";
+    	MLangWrite-Warning "方式2 无法获取游戏安装路径或未安装游戏" "Method2 fail";
     }
     else  #错误处理
     {
-      Write-Warning "方式2 无法获取Libraryfolders Method2 fail";
+      MLangWrite-Warning "方式2 无法获取Libraryfolders" "Method2 fail";
     }
   }
   
@@ -241,29 +259,25 @@ function Get-GameLibPath {
   }
   else
   {
-	Write-Warning "方式3 无法获取Libraryfolders Method3 fail";
+	MLangWrite-Warning "方式3 无法获取Libraryfolders" "Method3 fail";
   }	  
   
   #使用方式4
-  Write-Host "使用方式4 Using Method4 ..." 
-  start "steam://launch/636480/dialog"
-  $temp_ = Read-Host -Prompt "为了获取游戏安装路径, 请在手动启动游戏后, 按 回车键 继续 To get the game install path,please start game by yourself, then press Enter:>";
-  $result_ = Split-Path -Path (Get-Process ravenfield | Select-Object Path)[0].Path;
+  MLangWrite-Output "使用方式4 ..." "Using Method4 ..." 
+  start "steam://launch/$appID/dialog"
+  MLangWrite-Output "为了获取游戏安装路径, 请在手动启动游戏后, 按 回车键 继续:>" "To get the game install path,please start game by yourself, then press Enter:>"
+  $temp_ = Read-Host;
+  $result_ = Split-Path -Path (Get-Process $exeNameNoSubfix | Select-Object Path)[0].Path;
   if ( (Test-Path $result_) -eq $true )
   {
-	$global:gamePath = result_;  #游戏本体位置
+	$global:gamePath = $result_;  #游戏本体位置
 	return "$result_\..\..\..";
   }
-  Write-Warning "方式4 无法获取游戏安装位置 Method4 fail";
+  MLangWrite-Warning "方式4 无法获取游戏安装位置" "Method4 fail";
   return $null;
 }
 
 function Apply-BepInEXCN {
-  $bepInEXUrlID = "iMcD41xbcqgf"
-  $bepInEXInfo = "5.4.22 for x64"
-  $bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
-  $bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
-  
   if ( (Test-Path -Path "$global:gamePath\winhttp.dll") -eq $true )  #如果已经安装就跳过
   {
     Write-Host "已经安装BepInEX, 跳过"
@@ -278,14 +292,11 @@ function Apply-BepInEXCN {
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
     $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
     $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.leafone.cn/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down" `
+    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "$bepInEXUrl" `
       -WebSession $session `
       -OutFile $bepInEXDownloadPath `
       -Headers @{
-        "authority"="api.leafone.cn"
         "method"="GET"
-        "path"="/api/lanzou?url=https://www.lanzouj.com/$($bepInEXUrlID)&type=down"
-        "scheme"="https"
         "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
         "accept-encoding"="gzip, deflate, br, zstd"
         "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
@@ -374,8 +385,29 @@ function Apply-BepInEXGithub {
 # Apply-BepInEXCN
 #路径默认结尾无斜杠
 #func报错在主线程手动处理
-#统一initer:
+#未来：
+#  废弃bool返回报错
+#  统一缩进
+#union initer:
 <#
+function MLangWrite-Output ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+	else { Write-Output $en }
+}
+
+function MLangWrite-Warning ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+	else { Write-Output $en }
+}
+  
+#退出脚本递归，但必须在各ps脚本手动定义
+function Exit-IScript {
+  MLangWrite-Output "您现在可以关闭窗口了" "Now you can close this window";
+  Read-Host;
+  Exit;
+  Exit-IScript;
+}
+
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
 $global:corelibSrc = $null
@@ -384,23 +416,26 @@ if ( $global:corelibSrc -eq $null ) {
   $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
 }
 if ( $global:corelibSrc -eq $null ) {
-  Write-Warning "无法初始化依赖库 Cannot init corelib";
+  MLangWrite-Warning "无法初始化依赖库" "Cannot init corelib";
   Exit-IScript;
 }
 else { iex $global:corelibSrc; }
 #>
 
-Write-Host "初始化环境 Initing env ...";
+MLangWrite-Output "初始化环境 ..." "Initing env ...";
 
 #32位检测
-if ([Environment]::Is32BitOperatingSystem) { Write-Warning "可能不支持本机的32位系统，需要手动安装 The script may not support 32-bit system!"; }
+if ([Environment]::Is32BitOperatingSystem) {
+	MLangWrite-Warning "不支持本机的32位系统，需要手动安装!" "The script may not support 32-bit system!"; 
+	Exit-IScript
+}
 
 #获取下载路径
 $global:downloadPath = "$((Get-ChildItem Env:appdata).Value)\RavenfieldCommunityCN";
 #如果下载路径不存在则新建
 if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath; } 
 #测试与打印下载目录
-Write-Host "下载目录 Download path: $downloadPath";
+MLangWrite-Output "下载目录: $downloadPath" "Download path: $downloadPath";
 
 #初始化vdf
 #仅需要再次读写的变量才加上Global标志
@@ -411,20 +446,20 @@ if ($global:gamePath -eq $null) { $global:gamePath = ""; }  #游戏本体位置
 #获取steam安装路径
 $global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/','\');
 if ($? -eq $true) {
-  Write-Host "Steam安装路径 Steam path: $($global:steamPath)"
+  MLangWrite-Output "Steam安装路径: $($global:steamPath)" "Steam path: $($global:steamPath)"
 
   #获取游戏库位置
   $global:gameLibPath = Get-GameLibPath
   if ($global:gameLibPath -eq $null){ Exit-IScript }
-  Write-Host "游戏所在Steam库路径 Game library path: $($global:gameLibPath)";
+  MLangWrite-Output "游戏所在Steam库路径: $($global:gameLibPath)" "Game library path: $($global:gameLibPath)";
 
   #计算游戏安装位置
   if ($global:gamePath -eq "") { $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"; }
-  Write-Host "游戏所在安装路径 Game path: $($global:gamePath)";
-  Write-Host "";
+  MLangWrite-Output "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";
+  MLangWrite-Output "";
 }
 else  #错误处理
 {
-  Write-Host "无法获取Steam安装路径 Cannot get steam path";
+  MLangWrite-Output "无法获取Steam安装路径" "Cannot get steam path";
   Exit-IScript
 }

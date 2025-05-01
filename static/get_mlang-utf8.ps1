@@ -23,13 +23,14 @@ if ( $global:corelibSrc -eq $null ) {
 }
 else { iex $global:corelibSrc; }
 
+#定义下载链接与文件hash
+$translatorUrl = "https://ghproxy.net/https://github.com/bbepis/XUnity.AutoTranslator/releases/download/v5.4.5/XUnity.AutoTranslator-BepInEx-5.4.5.zip"
+$translatorInfo = "5.4.5"
+$translatorHash = "1A037CB25159B9775D63284E73C5096F16490D4D627E2AB32F8F3D5C00F822AE"
+$translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
+$itemId=3237432182
+
 function Apply-Translator {
-  #定义下载链接与文件hash
-  $translatorUrlID = "iNKGb1xbf8ze"
-  $translatorInfo = "5.3.0"
-  $translatorHash = "E9D2C514408833D516533BCC96E64C246140F6A8579A5BC4591697BB8D16DEE3"
-  $translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
-  
   if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true ) {
     Write-Host "已经安装 XUnity.AutoTranslator, 跳过"
     return $true 
@@ -46,10 +47,6 @@ function Apply-Translator {
       -WebSession $session `
       -OutFile $translatorDownloadPath `
       -Headers @{
-        "authority"="api.leafone.cn"
-        "method"="GET"
-        "path"="/api/lanzou?url=https://www.lanzouj.com/$($translatorUrlID)&type=down"
-        "scheme"="https"
         "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
         "accept-encoding"="gzip, deflate, br, zstd"
         "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
@@ -69,11 +66,11 @@ function Apply-Translator {
         if ($hash_ -eq $translatorHash){ 
           Expand-Archive -Path $translatorDownloadPath -DestinationPath $global:gamePath -Force
           if ($_ -eq $null) {
-            Write-Host "XUnity.AutoTranslator已安装"           
+            Write-Host "XUnity.AutoTranslator 已安装"           
             return $true 
           }
           else {
-           Write-Warning "XUnity.AutoTranslator安装失败"
+           Write-Warning "XUnity.AutoTranslator 安装失败"
            return $false 
           }
         }
@@ -91,8 +88,8 @@ function Apply-Translator {
 
 function Apply-MLang {
   #定义文件位置
-  $file1 = "$global:gameLibPath\steamapps\workshop\content\636480\3237432182\main_extra-sch.txt"
-  $file2 = "$global:gameLibPath\steamapps\workshop\content\636480\3237432182\main-sch.txt"
+  $file1 = "$global:gameLibPath\steamapps\workshop\content\$appID\$itemId\main_extra-sch.txt"
+  $file2 = "$global:gameLibPath\steamapps\workshop\content\$appID\$itemId\main-sch.txt"
   $targetPath = "$global:gamePath\BepInEX\Translation\en\Text"
   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true ) {
@@ -113,16 +110,12 @@ function Apply-MLang {
       #无报错就执行到这里
       Write-Host "导入翻译文件成功" 
       return $true
-    }
-	#错误处理
-    else {
-      Write-Warning "创建目录失败"      
-    }
-    #错误处理
+    } else {
+      Write-Warning "创建目录失败"
+  }}
   else {
     Write-Warning "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
     return $false
-  }
   }
 }
 
@@ -138,7 +131,7 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 # 当前最新版为 Update 2 (202412272000)
 "
 
-if ( (Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
-if ( (Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
+if ( $(Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
+if ( $(Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
 $result_ = Apply-MLang
 Exit-IScript

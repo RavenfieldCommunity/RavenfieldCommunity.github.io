@@ -1,0 +1,27 @@
+
+https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/372833
+
+echo $js | grep -o -P '(?<=https://gitee.com/RedQieMei/Raven-M/releases/download/).*?(?=.zip)'
+
+
+echo $js | grep -o -P '(?<=se,"name":").*?(?=")'
+
+
+/home/keil/.steam/steam/steamapps/common/RavenfieldSave/
+
+curl 'https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/372833' \
+  -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' \
+  -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' \
+  -H 'Connection: keep-alive' \
+  -b 'user_locale=zh-CN; oschina_new_user=false; remote_way=http; sensorsdata2015jssdkchannel=%7B%22prop%22%3A%7B%22_sa_channel_landing_url%22%3A%22%22%7D%7D; sensorsdata2015jssdkcross=%7B%22distinct_id%22%3A%2218fc283bdf7949-0b66546b98e5cd8-4c657b58-2073600-18fc283bdf81520%22%2C%22first_id%22%3A%22%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E7%9B%B4%E6%8E%A5%E6%B5%81%E9%87%8F%22%2C%22%24latest_search_keyword%22%3A%22%E6%9C%AA%E5%8F%96%E5%88%B0%E5%80%BC_%E7%9B%B4%E6%8E%A5%E6%89%93%E5%BC%80%22%2C%22%24latest_referrer%22%3A%22%22%7D%2C%22%24device_id%22%3A%2218fc283bdf7949-0b66546b98e5cd8-4c657b58-2073600-18fc283bdf81520%22%7D; Hm_lvt_a1170d3ff94c236dacd36a05af8385ea=1737453049; slide_id=10; Hm_lvt_24f17767262929947cc3631f99bfd274=1742630428,1744449679; sl-session=MrRgETLeDGiADqBE0Rtq4w==; BEC=1f1759df3ccd099821dcf0da6feb0357' \
+  -H 'DNT: 1' \
+  -H 'If-None-Match: W/"989fc4153b89b1dd19bc628d5031932d"' \
+  -H 'Sec-Fetch-Dest: document' \
+  -H 'Sec-Fetch-Mode: navigate' \
+  -H 'Sec-Fetch-Site: none' \
+  -H 'Sec-Fetch-User: ?1' \
+  -H 'Upgrade-Insecure-Requests: 1' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0' \
+  -H 'sec-ch-ua: "Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Windows"'
