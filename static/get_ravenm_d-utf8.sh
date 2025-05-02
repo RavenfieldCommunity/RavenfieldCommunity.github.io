@@ -192,44 +192,51 @@ arch -x86_64 /bin/bash ./run_bepinex.sh" > $gamePath/RUN_ME.sh
   fi
 }
 
-function ApplyRavenMCN() {
-#todo
-  fileUrl="https://github.com/iliadsh/RavenM/releases/download/latest/RavenM-v0.7.zip"
+function ApplyRavenM() {
+  json=$(curl 'https://api.github.com/repos/iliadsh/RavenM/releases/latest' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: document' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0' -H 'sec-ch-ua: "Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"')
+  if (($? != 304)); then
+    CatchError "Error when fetching info of RavenM"
+  fi
+  
+  #打印ver
+  versionName=$(echo $json | grep -o -P '(?<=tag_name": ").*?(?=",)' - )
+  echo "Downloading RavenM (${versionName}) ..."
+  
+  #取id并下载
+  fileUrl=$(echo $json | grep -o -P '(?<=browser_download_url": ").*?(?=")' - )	
   result=$(curl -L --max-redirs 5 $fileUrl -o $ravenmCNDownlaodPath  -w "%{http_code}" -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7' -H 'Accept-Language: zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: document' -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0' -H 'sec-ch-ua: "Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"')
-  echo "服务器返回码: $result"
+  echo "Return code: $result"
   if (($result != 200)); then
-    CatchError "RavenMCN 下载失败, 请反馈或稍后重试"
+    CatchError "RavenM download failed"
   fi
   
   #unzip
   unzip -o $ravenmCNDownlaodPath -d "$gamePath/BepInEx/plugins" 
   if (($? != 0)); then
-    CatchError "RavenMCN 安装失败"
+    CatchError "RavenMCN install failed"
   fi  
-  echo "RavenMCN 安装成功"
+  echo "RavenMCN installed"
 }
   
 ApplyBepinEX
-ApplyRavenMCN
+ApplyRavenM
 
 #最后步骤
-echo "安装已结束"
+echo "Installation fisished"
 if (($isArm == 1)); then
-  echo "从游戏目录执行脚本运行 BepInEX, 请执行脚本创建的 `RUN_ME.sh` 而不是 `run_bepinex.sh`"
+  echo "Run BepInEX from the game directory, please run the script `RUN_ME.sh` which created by this script instead of `run_bepinex.sh`"
 fi
 
+echo "if you want to run BepInEX, please add this command to game startup argument(On Steam -> Game properties -> Advanced startup arguments, or others):"
 if (($useProton == 1)); then
-  echo "您使用了Windows兼容层, 若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
-WINEDLLOVERRIDES=\"winhttp.dll=n,b\" %command%"
+  echo "WINEDLLOVERRIDES=\"winhttp.dll=n,b\" %command%"
 elif (($macos == 1)); then
   if (($isArm == 1)); then
-    echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
-\"$gamePath/RUN_ME.sh\" %command%"
+    echo "\"$gamePath/RUN_ME.sh\" %command%"
   else
   fi
 else
-  echo "若要在游戏启动时启用 BepInEX, 请将下行内容添加入游戏启动参数(在 Steam -> `游戏属性`-> `高级启动参数`, 或其他):
-./run_bepinex.sh %command%
+  echo "./run_bepinex.sh %command%
 "
 fi
 

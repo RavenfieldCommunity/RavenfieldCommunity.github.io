@@ -197,6 +197,15 @@ function Exit-IScript {
   Exit-IScript;
 }
 
+#获取下载路径
+$global:downloadPath = "$((Get-ChildItem Env:appdata).Value)\RavenfieldCommunityCN\";
+if( $global:downloadPath.Contains("AppData") -ne $true) { #有些玩家的设备真的逆天
+  $global:downloadPath = "D:\Temp\RavenfieldCommunityCN\";
+}
+#如果下载路径不存在则新建
+if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath; } 
+#测试与打印下载目录
+MLangWrite-Output "下载目录: $downloadPath" "Download path: $downloadPath";
 
 $appID = 636480
 $bepInEXUrl = "https://ghproxy.net/https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip"
@@ -429,13 +438,6 @@ if ([Environment]::Is32BitOperatingSystem) {
 	MLangWrite-Warning "不支持本机的32位系统，需要手动安装!" "The script may not support 32-bit system!"; 
 	Exit-IScript
 }
-
-#获取下载路径
-$global:downloadPath = "$((Get-ChildItem Env:appdata).Value)\RavenfieldCommunityCN";
-#如果下载路径不存在则新建
-if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath; } 
-#测试与打印下载目录
-MLangWrite-Output "下载目录: $downloadPath" "Download path: $downloadPath";
 
 #初始化vdf
 #仅需要再次读写的变量才加上Global标志
