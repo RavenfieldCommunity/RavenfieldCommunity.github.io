@@ -118,6 +118,11 @@ Write-Host "# RavenM联机插件 直接安装脚本
 # 提示: 本地的安装文件会自动从服务器获取新的插件
 # 提示: 本安装脚本不适用类Unix
 "
+
+if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome") -ne $null ) {
+    start "https://ravenfieldcommunity.github.io/docs/cn/Projects/ravenm.html#%E4%BD%BF%E7%94%A8"
+}
+
 if ( (Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
 $temp_ = Apply-RavenMCN
 Exit-IScript

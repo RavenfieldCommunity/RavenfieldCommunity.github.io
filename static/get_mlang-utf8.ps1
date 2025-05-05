@@ -131,6 +131,10 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 # 当前最新版为 Update 2 (202412272000)
 "
 
+if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome") -ne $null ) {
+    start "https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang.html#%E6%8F%90%E7%A4%BA"
+}
+
 if ( $(Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
 if ( $(Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
 $result_ = Apply-MLang
