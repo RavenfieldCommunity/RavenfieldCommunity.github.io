@@ -81,7 +81,7 @@ function Apply-Translator {
       }
       else {
           Write-Warning "XUnity.AutoTranslator 下载失败，请反馈或重新下载"        
-        retrun $false
+        return $false
       }
    }
 }
