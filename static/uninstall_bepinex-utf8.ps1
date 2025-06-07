@@ -48,6 +48,10 @@ function Remove-MLang {
   $file2 = "$global:gamePath\BepInEX\plugins\XUnity.ResourceRedirector"
   $file3 = "$global:gamePath\BepInEx\core\XUnity.Common.dll"
   $file4 = "$global:gamePath\BepInEx\Translation"
+  $file5 = "$global:gamePath\BepInEx\config\AutoTranslatorConfig.ini"
+  $file6 = "$global:gamePath\tmpchinesefont"
+  $file7 = "$global:gamePath\arialuni_sdf_u2019"
+  $file8 = "$global:gamePath\wenquanyi_bitmap_song_12px_sdf"
   if ( (Test-Path -Path $file1) -eq $true ) #如果文件存在
   {
     Write-Host "删除 XUnity.AutoTranslator文件夹 (1/4) ..."
@@ -56,8 +60,23 @@ function Remove-MLang {
 	rm $file2 -Recurse
 	Write-Host "删除 XUnity.Common.dll (3/4) ..."
 	rm $file3
-	Write-Host "删除 翻译文件 (4/4) ..."
+	Write-Host "删除 配置文件 (4/4) ..."
+	rm $file5
+	Write-Host "删除 翻译文件 (5/4) ..."
 	rm $file4 -Recurse
+	if ( (Test-Path -Path $file6) -eq $true ){
+	  Write-Host "删除 字体补丁 (6/4) ..."
+      rm $file6 -Recurse
+	}
+	if ( (Test-Path -Path $file7) -eq $true ){
+	  Write-Host "删除 字体补丁 (6/4) ..."
+      rm $file7 -Recurse
+	}
+	if ( (Test-Path -Path $file8) -eq $true ){
+	  Write-Host "删除 字体补丁 (6/4) ..."
+      rm $file8 -Recurse
+	}
+	
   }
   else  #错误处理
   {
@@ -70,13 +89,18 @@ function Remove-RavenMCN {
   #定义文件位置
   $file1 = "$global:gamePath\BepInEx\plugins\RavenM.dll"   #如果文件存在
   $file2 = "$global:gamePath\BepInEx\plugins\RavenM0.dll"   #如果文件存在
+  $file3 = "$global:gamePath\BepInEx\config\RavenM.cfg"   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true )  {
-    Write-Host "删除 联机插件 (1/1) ..."
+    Write-Host "删除 联机插件 (1/2) ..."
 	rm $file1
   }
   if ( (Test-Path -Path $file2) -eq $true )  {
-    Write-Host "删除 联机插件 (2/1) ..."
-	rm $file1
+    Write-Host "删除 联机插件 (2/2) ..."
+	rm $file2
+  }
+  if ( (Test-Path -Path $file3) -eq $true )  {
+    Write-Host "删除 配置文件 (3/2) ..."
+	rm $file3
   }
   else {
     Write-Warning "未安装"
