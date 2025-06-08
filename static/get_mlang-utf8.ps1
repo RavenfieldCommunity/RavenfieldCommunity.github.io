@@ -30,6 +30,45 @@ $translatorHash = "1A037CB25159B9775D63284E73C5096F16490D4D627E2AB32F8F3D5C00F82
 $translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator下载到的本地文件
 $itemId=3237432182
 
+function Apply-TMFont {
+  if ( (Test-Path -Path "$global:gamePath\wenquanyi_bitmap_song_12px_sdf") -or (Test-Path -Path "$global:gamePath\arialuni_sdf_u2019") -or (Test-Path -Path "$global:gamePath\tmpchinesefont") ) 
+  { 
+    Write-Host "字体补丁已安装, 跳过"
+    return; 
+  }
+  Write-Host "是否安装用于EA32及以后的字体补丁? 可用字体
+1. 文泉驿点阵 12px (推荐, 最小体积)
+2. Noto CJK
+3. 微软雅黑"
+  $yesRun = Read-Host -Prompt "按 对应序号数字键并回车 确定，直接回车或任意键默认使用第一项:>"
+  if ($yesRun  -eq "2") { 
+      $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/arialuni_sdf_u2019" 
+      $global:fontName="arialuni_sdf_u2019"
+  }
+  elseif ($yesRun  -eq "3") {
+	  $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/tmpchinesefont"
+      $global:fontName="tmpchinesefont"	  
+  }
+  else {
+	  $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf" 
+	  $global:fontName="wenquanyi_bitmap_song_12px_sdf"	 
+  }
+  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+  Write-Host "正在下载 字体补丁 ($($global:fontName)) ..." 
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "$global:downloadUrl" `
+      -WebSession $session `
+      -OutFile "$global:gamePath/$global:fontName"
+  Write-Host "正在应用 字体补丁 ..." 
+  if (Test-Path -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"){
+    (Get-Content -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini") -Replace 'OverrideFontTextMeshPro=', "OverrideFontTextMeshPro=$global:fontName" | Set-Content -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"
+  }
+  else{
+    New-Item -Path "$global:gamePath/BepInEx/config" -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Behaviour]
+OverrideFontTextMeshPro=$global:fontName"
+  }
+  Write-Host "已应用 字体补丁" 
+}
+
 function Apply-Translator {
   if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true ) {
     Write-Host "已经安装 XUnity.AutoTranslator, 跳过"
@@ -138,4 +177,5 @@ if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome")
 if ( $(Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
 if ( $(Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
 $result_ = Apply-MLang
+$result_ = Apply-TMFont
 Exit-IScript
