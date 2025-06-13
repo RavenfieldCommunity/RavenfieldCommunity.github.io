@@ -58,26 +58,27 @@ function Apply-TMFont {
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "$global:downloadUrl" `
       -WebSession $session `
       -OutFile "$global:gamePath/$global:fontName"
-  Write-Host "正在应用 字体补丁 ..." 
+}
+
+function Apply-TConfig {
+  Write-Host "正在应用配置 ..."
   $configPath="$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"
   if (Test-Path -Path $configPath){
-    if( (Select-String -Path C:\Users\pc\Demo\Demo.txt -Pattern "Behaviour") -eq $null){
-      (Get-Content -Path $configPath) -Replace 'OverrideFontTextMeshPro', "Override_OLD_FontTextMeshPro" | Set-Content -Path $configPath
-	  (Get-Content -Path $configPath) -Replace '\[Behaviour]', "[Behaviour]
+    (Get-Content -Path $configPath) -Replace 'OverrideFontTextMeshPro', "Override_OLD_FontTextMeshPro" | Set-Content -Path $configPath
+    (Get-Content -Path $configPath) -Replace '\[Behaviour]', "[Behaviour]
 OverrideFontTextMeshPro=$global:fontName
 " | Set-Content -Path $configPath
-    }
-	else {
-	  Set-Content -Path $configPath "[Behaviour]
-OverrideFontTextMeshPro=$global:fontName
-"+(Get-Content -Path $configPath)
-	}
+    (Get-Content -Path $configPath) -Replace 'Endpoint', "End_OLD_point" | Set-Content -Path $configPath
+    (Get-Content -Path $configPath) -Replace '\[Service]', "[Service]
+Endpoint=
+" | Set-Content -Path $configPath
   }
   else{
-    New-Item -Path "$global:gamePath/BepInEx/config" -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Behaviour]
+    New-Item -Path "$global:gamePath/BepInEx/config" -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Service]
+Endpoint=
+[Behaviour]
 OverrideFontTextMeshPro=$global:fontName"
   }
-  Write-Host "已应用 字体补丁" 
 }
 
 function Apply-Translator {
@@ -178,7 +179,7 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 
 # 提示：在已安装汉化的情况下重新安装汉化 => 等价于更新
 # 提示：任何Bug可在Steam评论区或百度贴吧、RavenfieldCommunity提出
-# 当前最新版为 Update 2 (202412272000)
+# 当前最新版为 Update 3 (202506131940)
 "
 
 if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome") -ne $null ) {
@@ -189,4 +190,5 @@ if ( $(Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
 if ( $(Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
 $result_ = Apply-MLang
 $result_ = Apply-TMFont
+$result_ = Apply-TConfig
 Exit-IScript
