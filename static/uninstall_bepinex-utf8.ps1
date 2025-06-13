@@ -7,6 +7,15 @@ function Exit-IScript {
   Exit-IScript
 }	
 
+function MLangWrite-Output ([string]$cn, [string]$en) {
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+  else { Write-Output $en }
+}
+
+function MLangWrite-Warning ([string]$cn, [string]$en) {
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+  else { Write-Output $en }
+}
 
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
@@ -23,23 +32,25 @@ else { iex $global:corelibSrc; }
 
 function Remove-BepInEX {
   #定义文件位置
+  MLangWrite-Output "将要执行的操作:
+  删除 BepInEX 文件夹
+  删除 hook (winhttp.dll)
+  删除 doorstop配置" "Steps to do:
+  Delete BepInEX folder
+  Delete hook (winhttp.dll)
+  Delete doorstop config"
   $file1 = "$global:gamePath\BepInEX"
   $file2 = "$global:gamePath\winhttp.dll"
   $file3 = "$global:gamePath\doorstop_config.ini"
-  if ( (Test-Path -Path $file2) -eq $true ) #如果文件存在
-  {
-    MLangWrite-Output "删除 BepInEX文件夹 (1/3) ..." "Deleting BepInEX文件夹 (1/3) ..."
-	  rm $file1 -Recurse
-	  MLangWrite-Output "删除 winhttp.dll (2/3) ..." "Deleting winhttp.dll (2/3) ..."
-	  rm $file2
-	  MLangWrite-Output "删除 doorstop_config.ini (3/3) ..." "Deleting winhttp.dll (2/3) ..."
-	  rm $file3
-  }
-  else  #错误处理
-  {
-    Write-Warning "未安装"
-    return $false
-  }
+  if ( (Test-Path -Path $file1) -eq $true ){
+    MLangWrite-Output "删除 BepInEX 文件夹 ..." "Deleting BepInEX folder ..."
+    rm $file1 -Recurse }
+  if ( (Test-Path -Path $file2) -eq $true ){
+	  MLangWrite-Output "删除 hook ..." "Deleting hook ..."
+    rm $file2 }
+  if ( (Test-Path -Path $file3) -eq $true ){
+	  MLangWrite-Output "删除 doorstop配置 ..." "Deleting doorstop config (2/3) ..."
+    rm $file3}
 }
 
 function Remove-MLang {
@@ -52,36 +63,44 @@ function Remove-MLang {
   $file6 = "$global:gamePath\tmpchinesefont"
   $file7 = "$global:gamePath\arialuni_sdf_u2019"
   $file8 = "$global:gamePath\wenquanyi_bitmap_song_12px_sdf"
-  if ( (Test-Path -Path $file1) -eq $true ) #如果文件存在
+  Write-Output "将要执行的操作:
+  删除 XUnity.AutoTranslator
+  删除 XUnity.ResourceRedirector
+  删除 XUnity.Common
+  删除 配置文件
+  删除 翻译文件
+  删除 字体补丁"
+  if ( (Test-Path -Path $file1) -eq $true ) 
   {
-    Write-Host "删除 XUnity.AutoTranslator文件夹 (1/4) ..."
-	rm $file1 -Recurse
-	Write-Host "删除 XUnity.ResourceRedirector (2/4) ..."
-	rm $file2 -Recurse
-	Write-Host "删除 XUnity.Common.dll (3/4) ..."
-	rm $file3
-	Write-Host "删除 配置文件 (4/4) ..."
-	rm $file5
-	Write-Host "删除 翻译文件 (5/4) ..."
-	rm $file4 -Recurse
-	if ( (Test-Path -Path $file6) -eq $true ){
-	  Write-Host "删除 字体补丁 (6/4) ..."
-      rm $file6 -Recurse
-	}
-	if ( (Test-Path -Path $file7) -eq $true ){
-	  Write-Host "删除 字体补丁 (6/4) ..."
-      rm $file7 -Recurse
-	}
-	if ( (Test-Path -Path $file8) -eq $true ){
-	  Write-Host "删除 字体补丁 (6/4) ..."
-      rm $file8 -Recurse
-	}
-	
+    Write-Host "删除 XUnity.AutoTranslator文件夹 ..."
+    rm $file1 -Recurse}
+  if ( (Test-Path -Path $file2) -eq $true ) 
+  {
+	Write-Host "删除 XUnity.ResourceRedirector ..."
+    rm $file2 -Recurse}
+  if ( (Test-Path -Path $file3) -eq $true ) 
+  {
+	Write-Host "删除 XUnity.Common ..."
+    rm $file3}
+  if ( (Test-Path -Path $file5) -eq $true ) 
+  {
+	Write-Host "删除 配置文件 ..."
+    rm $file5}
+  if ( (Test-Path -Path $file4) -eq $true ) 
+  {
+	Write-Host "删除 翻译文件 ..."
+  rm $file4 -Recurse}
+  if ( (Test-Path -Path $file6) -eq $true ){
+    Write-Host "删除 字体补丁 ..."
+    rm $file6 -Recurse
   }
-  else  #错误处理
-  {
-    Write-Warning "未安装"
-    return $false
+  if ( (Test-Path -Path $file7) -eq $true ){
+    Write-Host "删除 字体补丁 ..."
+    rm $file7 -Recurse
+  }
+  if ( (Test-Path -Path $file8) -eq $true ){
+    Write-Host "删除 字体补丁 ..."
+    rm $file8 -Recurse
   }
 }
 
@@ -90,34 +109,40 @@ function Remove-RavenMCN {
   $file1 = "$global:gamePath\BepInEx\plugins\RavenM.dll"   #如果文件存在
   $file2 = "$global:gamePath\BepInEx\plugins\RavenM0.dll"   #如果文件存在
   $file3 = "$global:gamePath\BepInEx\config\RavenM.cfg"   #如果文件存在
+  Write-Output "将要执行的操作:
+  删除 联机插件
+  删除 配置文件"
   if ( (Test-Path -Path $file1) -eq $true )  {
-    Write-Host "删除 联机插件 (1/2) ..."
+    Write-Host "删除 联机插件 ..."
 	rm $file1
   }
   if ( (Test-Path -Path $file2) -eq $true )  {
-    Write-Host "删除 联机插件 (2/2) ..."
+    Write-Host "删除 联机插件 ..."
 	rm $file2
   }
   if ( (Test-Path -Path $file3) -eq $true )  {
-    Write-Host "删除 配置文件 (3/2) ..."
+    Write-Host "删除 配置文件 ..."
 	rm $file3
-  }
-  else {
-    Write-Warning "未安装"
-    return $false
   }
 }
 
 function Remove-HavenM {
   #定义文件位置
   $file1 = "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll"   #如果文件存在
+  MLangWrite-Output "将要执行的操作:
+  删除 更新服务
+  替换已修改的文件至原版" "Steps to do:
+  Delete ACUpdater
+  Replace the changed file to orignal one"
+  $file1 = "$global:gamePath\BepInEX\plugins\HavenM.ACUpdater.dll"
+  $file2 = "$global:gamePath\BepInEX\plugins\HavenM.ACUpdater0.dll"
   if ( (Test-Path -Path $file1) -eq $true )  {
-    MLangWrite-Output "删除 自动更新服务 (1/1) ..." "Deleting ACUpdater (1/1) ..."
+    MLangWrite-Output "删除 自动更新服务 ..." "Deleting ACUpdater ..."
 	rm $file1
   }
-  else {
-    MLangWrite-Output "未安装 自动更新服务" "ACUpdater is not installed"
-    return $false
+  if ( (Test-Path -Path $file2) -eq $true )  {
+    MLangWrite-Output "删除 自动更新服务 ..." "Deleting ACUpdater ..."
+	rm $file2
   }
   $temp_ = Remove-HavenM
   MLangWrite-Output "正在调用 Steam 修补游戏文件 ..." "Using Steam validate the game ..."
@@ -141,14 +166,16 @@ MLangWrite-Output "请选择操作:
   2. 删除多人联机国内版
   3. 删除HavenM
   4. 完全删除BepInEX框架及其附属插件
-" "Choose action:
+直接按 回车键 则取消执行，按 对应数字序号 并回车 执行对应操作" "Choose an action:
   1. Delete MLang
   2. Deletw RavenMCN
   3. Delete HavenM
   4. Competely detele BepInEX and plugins inside
-" 
-$yesRun = Read-Host -Prompt "直接按 回车键 则取消执行，按 对应数字序号 并回车 执行对应操作:>"
+Press Enter only to do nothing, press corresponding number and Enter to run the action" 
+$yesRun = Read-Host -Prompt ":>"
 if ($yesRun  -eq "1") { $temp_ = Remove-MLang }
-if ($yesRun  -eq "2") { $temp_ = Remove-RavenMCN }
+elseif ($yesRun  -eq "2") { $temp_ = Remove-RavenMCN }
+elseif ($yesRun  -eq "3") { $temp_ = Remove-HavenM }
 elseif ($yesRun  -eq "4") { $temp_ = Remove-BepInEX }
+MLangWrite-Output "操作结束" "Finished"
 Exit-IScript

@@ -59,8 +59,19 @@ function Apply-TMFont {
       -WebSession $session `
       -OutFile "$global:gamePath/$global:fontName"
   Write-Host "正在应用 字体补丁 ..." 
-  if (Test-Path -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"){
-    (Get-Content -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini") -Replace 'OverrideFontTextMeshPro=', "OverrideFontTextMeshPro=$global:fontName" | Set-Content -Path "$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"
+  $configPath="$global:gamePath/BepInEx/config/AutoTranslatorConfig.ini"
+  if (Test-Path -Path $configPath){
+    if( (Select-String -Path C:\Users\pc\Demo\Demo.txt -Pattern "Behaviour") -eq $null){
+      (Get-Content -Path $configPath) -Replace 'OverrideFontTextMeshPro', "Override_OLD_FontTextMeshPro" | Set-Content -Path $configPath
+	  (Get-Content -Path $configPath) -Replace '\[Behaviour]', "[Behaviour]
+OverrideFontTextMeshPro=$global:fontName
+" | Set-Content -Path $configPath
+    }
+	else {
+	  Set-Content -Path $configPath "[Behaviour]
+OverrideFontTextMeshPro=$global:fontName
+"+(Get-Content -Path $configPath)
+	}
   }
   else{
     New-Item -Path "$global:gamePath/BepInEx/config" -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Behaviour]

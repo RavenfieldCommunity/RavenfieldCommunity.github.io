@@ -16,7 +16,7 @@ function MLangWrite-Output ([string]$cn, [string]$en) {
 
 function MLangWrite-Warning ([string]$cn, [string]$en) {
 	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
-	else { Write-Output $en }
+	else { Write-Warning $en }
 }
 
 $w=(New-Object System.Net.WebClient);

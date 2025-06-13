@@ -186,7 +186,7 @@ function MLangWrite-Output ([string]$cn, [string]$en) {
 
 function MLangWrite-Warning ([string]$cn, [string]$en) {
 	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
-	else { Write-Output $en }
+	else { Write-Warning $en }
 }
   
 #退出脚本递归，但必须在各ps脚本手动定义

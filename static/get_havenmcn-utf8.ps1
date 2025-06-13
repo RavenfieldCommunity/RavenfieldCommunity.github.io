@@ -1,9 +1,19 @@
 #RF HavenM 安装脚本
 #感谢: BartJolling/ps-steam-cmd
 
+function MLangWrite-Output ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+	else { Write-Output $en }
+}
+
+function MLangWrite-Warning ([string]$cn, [string]$en) {
+	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+	else { Write-Warning $en }
+}
+
 #退出脚本递归，但必须在各ps脚本手动定义
 function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了 Now you can close this window";
+  Read-Host "您现在可以关闭窗口了" Now you can close this window";
   Exit;
   Exit-IScript;
 }
