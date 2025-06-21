@@ -69,18 +69,34 @@ function Apply-HavenM {
     -ContentType "application/json;charset=utf-8"
   if ($? -eq $true) {
     $json_ = $request_.Content | ConvertFrom-Json
-	  Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
+	$global:dllHash = "$($json_.assets[0].digest)"
+	Write-Host "Latest update's publish date: $($json_.assets[0].updated_at)"
     Write-Host "Please go to github to view the changelog"
   }
   #下载
   $havenMDownloadPath = "$global:downloadPath\HavenM.zip"
-  Write-Host "Downloading HavenM ..." 
-  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" `
+  Write-Host "Downloading HavenM ..."
+  #重置会话
+  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession  
+  $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/577.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/Release/Assembly-CSharp.dll" `
     -WebSession $session `
     -OutFile $havenMDownloadPath `
     -Headers @{
     "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-    "accept-encoding"="gzip, deflate, br, zstd"
+  "accept-encoding"="gzip, deflate, br, zstd"
+  "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+  "cache-control"="max-age=0"
+  "dnt"="1"
+  "priority"="u=0, i"
+  "sec-ch-ua"="`"Microsoft Edge`";v=`"137`", `"Chromium`";v=`"137`", `"Not/A)Brand`";v=`"24`""
+  "sec-ch-ua-mobile"="?0"
+  "sec-ch-ua-platform"="`"Windows`""
+  "sec-fetch-dest"="document"
+  "sec-fetch-mode"="navigate"
+  "sec-fetch-site"="cross-site"
+  "sec-fetch-user"="?1"
+  "upgrade-insecure-requests"="1"
     }
 	#无报错就apply
   if ($? -eq $true) {
@@ -90,9 +106,31 @@ function Apply-HavenM {
       Wait-Process -Name "ravenfield" -Timeout 10
     }	
     Write-Host "Installing HavenM..."
-    Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
-    if ($? -ne $true) {
+	$hash_ = (Get-FileHash $havenMDownloadPath -Algorithm SHA256).Hash
+    if( $($global:dllHash -split ":")[1] -eq $hash_ ){
+	  Write-Host "Downloaded file hash: $hash_"
+	  $global:continueCopyFile = $true
+	}
+	else {
+      Write-Host "Downloaded file hash invaild: $hash_"
+	  $fileToTest=$havenMDownloadPath+".dll"
+	  copy $havenMDownloadPath $fileToTest
+	  Add-Type -Path $fileToTest
+	  if( $? -eq $true ){
+		Write-Host "Downloaded file vaild"
+	    $global:continueCopyFile = $true
+	  }
+	}
+	if ($global:continueCopyFile -eq $true ) {
+		Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
+	}
+    if ($? -ne $true -or $global:continueCopyFile -ne $true ) {
       Write-Warning "Install HavenM failed" 
+	  $configPath="$global:gamePath/BepInEx/config/HavenM.ACUpdater.cfg"
+      if (Test-Path -Path $configPath){
+		  rm $configPath
+	  }
+	  Write-Warning "Please start the game after ACUpdater is installed to continue install HavenM" 
     } 
     else { Write-Host "HavenM installed" }
   }
@@ -159,6 +197,7 @@ Write-Host "# HavenM Installation script
 
 # Tip: Re-installing enquals updating
 # Tip: This script will install updater plugin!
+# Tip: DO NOT USE THE BATE BRANCH OR ANY NON-STABLE GAME BRANCH!
 "
 if ( $isUpdate -ne $null ) { Write-Host "Updating HavenM ..." }
 Apply-HavenM
