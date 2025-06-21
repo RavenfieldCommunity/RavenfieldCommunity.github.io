@@ -128,7 +128,6 @@ function Remove-RavenMCN {
 
 function Remove-HavenM {
   #定义文件位置
-  $file1 = "$global:gamePath\BepInEx\plugins\HavenM.ACUpdater.dll"   #如果文件存在
   MLangWrite-Output "将要执行的操作:
   删除 更新服务
   替换已修改的文件至原版" "Steps to do:
