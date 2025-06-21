@@ -31,11 +31,24 @@ $translatorDownloadPath = "$global:downloadPath\Translator.zip"  #Autotranslator
 $itemId=3237432182
 
 function Apply-TMFont {
-  if ( (Test-Path -Path "$global:gamePath\wenquanyi_bitmap_song_12px_sdf") -or (Test-Path -Path "$global:gamePath\arialuni_sdf_u2019") -or (Test-Path -Path "$global:gamePath\tmpchinesefont") ) 
+  if ( (Test-Path -Path "$global:gamePath\wenquanyi_bitmap_song_12px_sdf") )
+  { 
+	$global:fontName="wenquanyi_bitmap_song_12px_sdf"	 
+  }
+  elseif ( (Test-Path -Path "$global:gamePath\arialuni_sdf_u2019")) 
+  { 
+	$global:fontName="arialuni_sdf_u2019"	 
+  } 
+  elseif ( (Test-Path -Path "$global:gamePath\tmpchinesefont")) 
+  {
+	$global:fontName="tmpchinesefont"	 
+  }
+  if ( $global:fontName -ne $null ) 
   { 
     Write-Host "字体补丁已安装, 跳过"
     return; 
   }
+  
   Write-Host "是否安装用于EA32及以后的字体补丁? 可用字体
 1. 文泉驿点阵 12px (推荐, 最小体积)
 2. Noto CJK
