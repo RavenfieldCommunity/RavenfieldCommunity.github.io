@@ -54,12 +54,11 @@ if ( $global:corelibSrc -eq $null ) {
 }
 else { iex $global:corelibSrc; }
 
-#创建session
-$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-$session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-$session.Cookies.Add((New-Object System.Net.Cookie("user_session", "000-", "/", "github.com")))
 
 function Apply-HavenM {
+  #创建session
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+$session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/RavenfieldCommunity/HavenM/releases/latest" `
     -WebSession $session `
     -Headers @{
@@ -141,6 +140,9 @@ function Apply-HavenM {
 }
 
 function Apply-ACUpdater {
+  #创建session
+  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+  $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://api.github.com/repos/RavenfieldCommunity/HavenM/releases/latest" `
     -WebSession $session `
     -Headers @{

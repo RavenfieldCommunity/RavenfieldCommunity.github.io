@@ -13,7 +13,7 @@ function MLangWrite-Warning ([string]$cn, [string]$en) {
 
 #退出脚本递归，但必须在各ps脚本手动定义
 function Exit-IScript {
-  Read-Host "您现在可以关闭窗口了" Now you can close this window";
+  Read-Host "您现在可以关闭窗口了" "Now you can close this window";
   Exit;
   Exit-IScript;
 }
@@ -32,10 +32,8 @@ if ( $global:corelibSrc -eq $null ) {
 }
 else { iex $global:corelibSrc; }
 
-#创建session
 $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-$session.Cookies.Add((New-Object System.Net.Cookie("user_session", "000-", "/", "github.com")))
 
 function Apply-HavenM {
   Write-Host "更新日志请至Github查看"
