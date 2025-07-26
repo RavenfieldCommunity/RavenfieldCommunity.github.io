@@ -49,28 +49,28 @@ function Apply-TMFont {
     return; 
   }
   
-  Write-Host "是否安装用于EA32及以后的字体补丁? 可用字体
+  Write-Host "是否安装用于EA32及以后的字体补丁? 可用字体:
 1. 文泉驿点阵 12px (推荐, 最小体积)
 2. Noto CJK
 3. 微软雅黑"
-  $yesRun = Read-Host -Prompt "按 对应序号数字键并回车 确定，直接回车或任意键默认使用第一项:>"
+  $yesRun = Read-Host -Prompt "按 对应序号数字键 并按 回车Enter 以确定，直接回车 或任意键 默认使用第一项:>"
   if ($yesRun  -eq "2") { 
-      $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/arialuni_sdf_u2019" 
-      $global:fontName="arialuni_sdf_u2019"
+    $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/arialuni_sdf_u2019" 
+    $global:fontName="arialuni_sdf_u2019"
   }
   elseif ($yesRun  -eq "3") {
-	  $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/tmpchinesefont"
-      $global:fontName="tmpchinesefont"	  
+	$global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/tmpchinesefont"
+    $global:fontName="tmpchinesefont"	  
   }
   else {
-	  $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf" 
-	  $global:fontName="wenquanyi_bitmap_song_12px_sdf"	 
+    $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf" 
+    $global:fontName="wenquanyi_bitmap_song_12px_sdf"	 
   }
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   Write-Host "正在下载 字体补丁 ($($global:fontName)) ..." 
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "$global:downloadUrl" `
-      -WebSession $session `
-      -OutFile "$global:gamePath/$global:fontName"
+    -WebSession $session `
+    -OutFile "$global:gamePath/$global:fontName"
 }
 
 function Apply-TConfig {
@@ -87,7 +87,9 @@ Endpoint=
 " | Set-Content -Path $configPath
   }
   else{
-    New-Item -Path "$global:gamePath/BepInEx/config" -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Service]
+    $targetDirectory="$global:gamePath/BepInEx/config"
+    if ( (Test-Path -Path $targetDirectory) -ne $true) { $result_ = mkdir $targetDirectory; } 
+    New-Item -Path $targetDirectory -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Service]
 Endpoint=
 [Behaviour]
 OverrideFontTextMeshPro=$global:fontName"
@@ -97,12 +99,11 @@ OverrideFontTextMeshPro=$global:fontName"
 function Apply-Translator {
   if ( (Test-Path -Path "$global:gamePath\BepInEx\core\XUnity.Common.dll") -eq $true ) {
     Write-Host "已经安装 XUnity.AutoTranslator, 跳过"
-    return $true 
+    return;
   }
   else {
     Write-Host "正在下载 XUnity.AutoTranslator ($($translatorInfo)) ..." 
-    if ( $global:isAlreadyInstalledBepInEX -eq $false ) { Start-Sleep -Seconds 10 }  #api只能10s调用一次，下载太快了
-    #创建session并使用直链api请求文件
+    #创建session
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
     $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
@@ -131,21 +132,24 @@ function Apply-Translator {
           Expand-Archive -Path $translatorDownloadPath -DestinationPath $global:gamePath -Force
           if ($_ -eq $null) {
             Write-Host "XUnity.AutoTranslator 已安装"           
-            return $true 
+            return;
           }
           else {
            Write-Warning "XUnity.AutoTranslator 安装失败"
-           return $false 
+           Exit-IScript
+           return;
           }
         }
         else { 
           Write-Warning "下载的 XUnity.AutoTranslator 校验不通过或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
-          return $false
+          Exit-IScript
+          return ;
         }
       }
       else {
           Write-Warning "XUnity.AutoTranslator 下载失败，请反馈或重新下载"        
-        return $false
+        Exit-IScript
+        return;
       }
    }
 }
@@ -154,32 +158,34 @@ function Apply-MLang {
   #定义文件位置
   $file1 = "$global:gameLibPath\steamapps\workshop\content\$appID\$itemId\main_extra-sch.txt"
   $file2 = "$global:gameLibPath\steamapps\workshop\content\$appID\$itemId\main-sch.txt"
-  $targetPath = "$global:gamePath\BepInEX\Translation\en\Text"
+  $targetDirectoryPath = "$global:gamePath\BepInEX\Translation\en\Text"
   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true ) {
     Write-Host "已经订阅翻译文件"
-    if ( (Test-Path -Path $targetPath) -ne $true ) { mkdir $targetPath }  #如果目标目录不存在则新建
+    if ( (Test-Path -Path $targetDirectoryPath) -ne $true ) { mkdir $targetDirectoryPath }  #如果目标目录不存在则新建
     #如果目录创建成功
     if ($? -eq $true) {
       #1
-      Copy-Item -Path $file1 -Destination $targetPath -Force
+      Copy-Item -Path $file1 -Destination $targetDirectoryPath -Force
       if ($? -ne $true) { Write-Warning "导入翻译文件 main_extra-sch 失败" } else { Write-Host "导入翻译文件 main_extra-sch 成功" }
 
       #2
-      Copy-Item -Path $file2 -Destination $targetPath -Force
+      Copy-Item -Path $file2 -Destination $targetDirectoryPath -Force
       if ($? -ne $true) {
         Write-Warning "导入翻译文件 main-sch 失败" 
-        return $false
+        Exit-IScript
+        return;
       } else  { Write-Host "导入翻译文件 main-sch 成功" }
       #无报错就执行到这里
       Write-Host "导入翻译文件成功" 
-      return $true
+      return;
     } else {
       Write-Warning "创建目录失败"
   }}
   else {
     Write-Warning "未订阅 或 Steam未下载翻译文件到本地（Steam是否已经启动？Steam在后台时才会将工坊项目下载到本地）"
-    return $false
+    Exit-IScript
+    return;
   }
 }
 
@@ -196,12 +202,14 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 "
 
 if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome") -ne $null ) {
+  if($(tasklist | findstr "ravenfield") -eq $null) {
     start "https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang.html#%E6%8F%90%E7%A4%BA"
+  }
 }
 
-if ( $(Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
-if ( $(Apply-Translator) -ne $true) { Exit-IScript }  #如果失败就exit
-$result_ = Apply-MLang
-$result_ = Apply-TMFont
-$result_ = Apply-TConfig
+Apply-BepInEXCN
+Apply-Translator
+Apply-MLang
+Apply-TMFont
+Apply-TConfig
 Exit-IScript

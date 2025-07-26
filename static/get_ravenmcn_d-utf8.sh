@@ -112,7 +112,7 @@ function ApplyBepinEX() {
   #选择方案
   if (( $isBepInEXInstalled != 1 )); then
     echo "您想使用哪一种 BepInEX 运行模式?
-  0. 原生运行(包括ARM跑x64)
+  0. 原生运行(包括MacOS ARM跑x64)
   1. 使用类似Wine的Windows兼容层
 请输入序号"
     read -p ":>" useProton
@@ -194,7 +194,7 @@ function ApplyBepinEX() {
   #arm配置
   if (($isArm == 1)); then
     echo "#!/bin/sh
-arch -x86_64 /bin/bash ./run_bepinex.sh" > $gamePath/RUN_ME.sh
+arch -x86_64 /bin/bash '$gamePath/run_bepinex.sh'" > $gamePath/RUN_ME.sh
     chmod u+x $gamePath/RUN_ME.sh
 	if (($? == 0)); then
       echo "BepInEX ARM平台执行脚本 已配置启动权限"

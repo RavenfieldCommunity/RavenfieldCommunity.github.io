@@ -180,13 +180,13 @@ Class VdfTextReader {
 ###end module
 
 function MLangWrite-Output ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
-	else { Write-Output $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+  else { Write-Output $en }
 }
 
 function MLangWrite-Warning ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
-	else { Write-Warning $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+  else { Write-Warning $en }
 }
   
 #退出脚本递归，但必须在各ps脚本手动定义
@@ -264,7 +264,7 @@ function Get-GameLibPath {
   #使用方式3
   if ( (Test-Path -Path "$steamPath\steamapps\common\Ravenfield") -eq $true ) #如果存在
   {
-    return "$steamPath"
+    return $steamPath
   }
   else
   {
@@ -274,7 +274,7 @@ function Get-GameLibPath {
   #使用方式4
   MLangWrite-Output "使用方式4 ..." "Using Method4 ..." 
   start "steam://launch/$appID/dialog"
-  MLangWrite-Output "为了获取游戏安装路径, 请在手动启动游戏后, 按 回车键 继续:>" "To get the game install path,please start game by yourself, then press Enter:>"
+  MLangWrite-Output "为了获取游戏安装路径, 请在游戏出现画面后, 按 回车键 继续:>" "To get the game install path, when game has launched, press Enter:>"
   $temp_ = Read-Host;
   $result_ = Split-Path -Path (Get-Process $exeNameNoSubfix | Select-Object Path)[0].Path;
   if ( (Test-Path $result_) -eq $true )
@@ -291,7 +291,7 @@ function Apply-BepInEXCN {
   {
     Write-Host "已经安装BepInEX, 跳过"
 	$global:isAlreadyInstalledBepInEX = $true
-	return $true
+	return;
   }
   else
   {
@@ -328,23 +328,23 @@ function Apply-BepInEXCN {
           Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Force  #强制覆盖
           if ($? -eq $true) {
             Write-Host "BepInEX 已安装"           
-            return $true 
+            return;
           }
           else { #错误处理
            Write-Warning "BepInEX 安装失败"
-           return $false 
+           return;
           }
         }
         else #错误处理
         { 
           Write-Warning "下载的 BepInEX 校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
-          return $false
+          return;
         }
       }
       else #错误处理
       {
-          Write-Warning "BepInEX 下载失败，请反馈或重新下载"        
-        retrun $false
+        Write-Warning "BepInEX 下载失败，请反馈或重新下载"        
+        retrun;
       }
    }
 }
@@ -365,22 +365,22 @@ function Apply-BepInEXGithub {
         "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
         "accept-encoding"="gzip, deflate, br, zstd"
     }
-      if ($? -eq $true)  #无报错就校验并解压
-      {
-	    Write-Host "BepInEX downloaded"  
-        Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Forc
-        if ($? -eq $true) {
-            Write-Host "BepInEX installed"           
-        }
-        else { 
-           Write-Warning "BepInEX install failed"
-        }
-      }
-      else #错误处理
-      { 
+    if ($? -eq $true)  #无报错就校验并解压
+    {
+      Write-Host "BepInEX downloaded"  
+      Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Forc
+      if ($? -eq $true) {
+        Write-Host "BepInEX installed"           
+       }
+      else { 
         Write-Warning "BepInEX install failed"
       }
     }
+    else #错误处理
+    { 
+      Write-Warning "BepInEX install failed"
+    }
+  }
 }
 
 ###主程序
@@ -400,13 +400,13 @@ function Apply-BepInEXGithub {
 #union initer:
 <#
 function MLangWrite-Output ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
-	else { Write-Output $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+  else { Write-Output $en }
 }
 
 function MLangWrite-Warning ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
-	else { Write-Output $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+  else { Write-Output $en }
 }
   
 #退出脚本递归，但必须在各ps脚本手动定义
@@ -452,13 +452,22 @@ if ($? -eq $true) {
 
   #获取游戏库位置
   $global:gameLibPath = Get-GameLibPath
-  if ($global:gameLibPath -eq $null){ Exit-IScript }
+  if ($global:gameLibPath -eq $null){ 
+    MLangWrite-Warning. "无法获取游戏库路径" "Cannot get game lib path";
+    Exit-IScript 
+  }
   MLangWrite-Output "游戏所在Steam库路径: $($global:gameLibPath)" "Game library path: $($global:gameLibPath)";
 
   #计算游戏安装位置
   if ($global:gamePath -eq "") { $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"; }
-  MLangWrite-Output "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";
-  MLangWrite-Output "";
+  if (.(Test-Path -Path "$global:gamePath") -eq $true  ){
+    MLangWrite-Output "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";}
+  else{
+    MLangWrite-Warning. "无法获取游戏安装路径" "Cannot get game path";
+    Exit-IScript
+  }
+  
+  Write-Output "";
 }
 else  #错误处理
 {
