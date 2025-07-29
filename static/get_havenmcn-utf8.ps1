@@ -24,7 +24,7 @@ $w.Encoding=[System.Text.Encoding]::UTF8;
 $global:corelibSrc = $null
 $global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
 if ( $global:corelibSrc -eq $null ) {
-  $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
+  $global:corelibSrc = $w.DownloadString('https://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1'); 
 }
 if ( $global:corelibSrc -eq $null ) {
   Write-Warning "无法初始化依赖库";

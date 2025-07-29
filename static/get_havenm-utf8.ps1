@@ -31,7 +31,7 @@ if ((Get-Culture).Name -eq "zh-CN")  #中文重定向
 	$global:redirectSrc = $null
     $global:redirectSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/get_havenmcn-utf8.ps1');
     if ($? -eq $true) {
-    $global:redirectSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/get_havenmcn-utf8.ps1'); 
+    $global:redirectSrc = $w.DownloadString('https://ravenfieldcommunity-static.netlify.app/get_havenmcn-utf8.ps1'); 
 	}
 	if ($global:redirectSrc -eq $null) {
 	  Write-Warning "重定向失败，使用原脚本";
@@ -44,9 +44,9 @@ if ((Get-Culture).Name -eq "zh-CN")  #中文重定向
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
 $global:corelibSrc = $null
-$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
+$global:corelibSrc = $w.DownloadString('https://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
 if ( $global:corelibSrc -eq $null ) {
-  $global:corelibSrc = $w.DownloadString('http://ghproxy.net/https://raw.githubusercontent.com/ravenfieldcommunity/ravenfieldcommunity.github.io/main/static/corelib-utf8.ps1'); 
+  $global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1'); 
 }
 if ( $global:corelibSrc -eq $null ) {
   Write-Warning "Cannot init corelib";
