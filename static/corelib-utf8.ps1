@@ -460,7 +460,7 @@ if ($? -eq $true) {
 
   #计算游戏安装位置
   if ($global:gamePath -eq "") { $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"; }
-  if (.(Test-Path -Path "$global:gamePath") -eq $true  ){
+  if ((Test-Path -Path "$global:gamePath") -eq $true  ){
     MLangWrite-Output "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";}
   else{
     MLangWrite-Warning. "无法获取游戏安装路径" "Cannot get game path";

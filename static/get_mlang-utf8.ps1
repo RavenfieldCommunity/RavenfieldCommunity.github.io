@@ -82,14 +82,14 @@ function Apply-TConfig {
 OverrideFontTextMeshPro=$global:fontName
 " | Set-Content -Path $configPath
     (Get-Content -Path $configPath) -Replace 'Endpoint', "End_OLD_point" | Set-Content -Path $configPath
-    (Get-Content -Path $configPath) -Replace '\[Service]', "[Service]
+    $resdult_ = (Get-Content -Path $configPath) -Replace '\[Service]', "[Service]
 Endpoint=
 " | Set-Content -Path $configPath
   }
   else{
     $targetDirectory="$global:gamePath/BepInEx/config"
     if ( (Test-Path -Path $targetDirectory) -ne $true) { $result_ = mkdir $targetDirectory; } 
-    New-Item -Path $targetDirectory -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Service]
+    $resdult_ = New-Item -Path $targetDirectory -Name "AutoTranslatorConfig.ini" -ItemType "file" -Value "[Service]
 Endpoint=
 [Behaviour]
 OverrideFontTextMeshPro=$global:fontName"
@@ -162,7 +162,7 @@ function Apply-MLang {
   #如果文件存在
   if ( (Test-Path -Path $file1) -eq $true ) {
     Write-Host "已经订阅翻译文件"
-    if ( (Test-Path -Path $targetDirectoryPath) -ne $true ) { mkdir $targetDirectoryPath }  #如果目标目录不存在则新建
+    if ( (Test-Path -Path $targetDirectoryPath) -ne $true ) { $resdult_ = mkdir $targetDirectoryPath }  #如果目标目录不存在则新建
     #如果目录创建成功
     if ($? -eq $true) {
       #1
