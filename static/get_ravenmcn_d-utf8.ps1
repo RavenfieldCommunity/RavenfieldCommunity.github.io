@@ -123,6 +123,6 @@ if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome")
     start "https://ravenfieldcommunity.github.io/docs/cn/Projects/ravenm.html#%E4%BD%BF%E7%94%A8"
 }
 
-if ( (Apply-BepInEXCN) -ne $true) { Exit-IScript }  #如果失败就exit
+Apply-BepInEXCN
 $temp_ = Apply-RavenMCN
 Exit-IScript
