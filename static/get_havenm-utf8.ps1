@@ -76,10 +76,8 @@ $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
   $havenMDownloadPath = "$global:downloadPath\HavenM.zip"
   Write-Host "Downloading HavenM ..."
   #重置会话
-  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession  
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/577.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/Release/Assembly-CSharp.dll" `
-    -WebSession $session `
     -OutFile $havenMDownloadPath `
     -Headers @{
       "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"

@@ -43,7 +43,7 @@ function Apply-HavenM {
   $global:downloadUrl = $null
   Write-Host "是否使用KGithub加速?"
   $yesRun = Read-Host -Prompt "按 任意键并回车 确定，直接回车取消使用加速:>"
-  if ($yesRun  -eq "1") { $global:downloadUrl = "https://kkgithub.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
+  if ($yesRun  -eq "1") { $global:downloadUrl = "https://gh.llkk.cc/https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
   else { $global:downloadUrl = "https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri $global:downloadUrl `
     -WebSession $session `
