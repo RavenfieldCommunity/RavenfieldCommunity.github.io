@@ -31,6 +31,9 @@ if ((Get-Culture).Name -eq "zh-CN")  #中文重定向
 	$global:redirectSrc = $null
     $global:redirectSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/get_havenmcn-utf8.ps1');
     if ($? -eq $true) {
+    $global:redirectSrc = $w.DownloadString('https://ghproxy.net/github.com/RavenfieldCommunity/UnionSetup/releases/download/1/get_havenmcn-utf8.zip'); 
+	}
+if ($? -eq $true) {
     $global:redirectSrc = $w.DownloadString('https://ravenfieldcommunity-static.netlify.app/get_havenmcn-utf8.ps1'); 
 	}
 	if ($global:redirectSrc -eq $null) {
@@ -47,6 +50,9 @@ $global:corelibSrc = $null
 $global:corelibSrc = $w.DownloadString('https://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
 if ( $global:corelibSrc -eq $null ) {
   $global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1'); 
+}
+if ( $global:corelibSrc -eq $null ) {
+  $global:corelibSrc = $w.DownloadString('https://ghproxy.net/github.com/RavenfieldCommunity/UnionSetup/releases/download/1/corelib-utf8.appx'); 
 }
 if ( $global:corelibSrc -eq $null ) {
   Write-Warning "Cannot init corelib";
@@ -76,8 +82,10 @@ $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.
   $havenMDownloadPath = "$global:downloadPath\HavenM.zip"
   Write-Host "Downloading HavenM ..."
   #重置会话
+  $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession  
   $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/577.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://github.com/RavenfieldCommunity/HavenM/releases/download/Release/Assembly-CSharp.dll" `
+    -WebSession $session `
     -OutFile $havenMDownloadPath `
     -Headers @{
       "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
