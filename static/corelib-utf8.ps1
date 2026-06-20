@@ -179,6 +179,35 @@ Class VdfTextReader {
 }
 ###end module
 
+function DownloadBinary-MLink([string]$path, [string[]]$links) {
+    foreach ($link in $links) {
+        Write-Host "Downloading ..."
+        $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+        $session.UserAgent = "Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/543.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/543.36 Edg/138.0.0.0"
+        $request_ = Invoke-WebRequest -UseBasicParsing -Uri $link `
+            -WebSession $session `
+            -OutFile $path `
+            -Headers @{
+                "method"="GET"
+            "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+            "accept-encoding"="gzip, deflate, br, zstd"
+            "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+            "priority"="u=0, i"
+            "sec-ch-ua"="`"Microsoft Edge`";v=`"138`", `"Chromium`";v=`"138`", `"Not.A/Brand`";v=`"27`""
+            "sec-ch-ua-mobile"="?0"
+            "sec-ch-ua-platform"="`"Windows`""
+            "sec-fetch-dest"="document"
+            "sec-fetch-mode"="navigate"
+            "sec-fetch-site"="none"
+            "sec-fetch-user"="?1"
+            "upgrade-insecure-requests"="1"
+             }
+       $result_=$?
+       if ($result_ -eq $true) {return $null;}
+      }
+    return $false;
+}
+
 function MLangWrite-Output ([string]$cn, [string]$en) {
   if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
   else { Write-Output $en }
@@ -208,7 +237,7 @@ if ( (Test-Path -Path $downloadPath) -ne $true) { $result_ = mkdir $downloadPath
 MLangWrite-Output "下载目录: $downloadPath" "Download path: $downloadPath";
 
 $appID = 636480
-$bepInEXUrl = "https://ghproxy.net/https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip"
+$bepInEXUrls = "https://gitee.com/RavenfieldCommunity/UnionSetup/releases/download/res/BepInEx_x64_5.4.22.0.zip", "https://gh.llkk.cc/https://github.com/BepInEx/BepInEx/releases/download/v5.4.22/BepInEx_x64_5.4.22.0.zip";
 $bepInEXHash = "4C149960673F0A387BA7C016C837096AB3A41309D9140F88590BB507C59EDA3F"
 $bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
 $exeNameNoSubfix = "ravenfield"
@@ -291,35 +320,14 @@ function Apply-BepInEXCN {
   {
     Write-Host "已经安装BepInEX, 跳过"
 	$global:isAlreadyInstalledBepInEX = $true
-	return;
+	return $null;
   }
   else
   {
     Write-Host "正在下载BepInEX ($($bepInEXInfo)) ..." 
     #创建session并使用直链api请求文件
-    $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-    $session.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
-    $session.Cookies.Add((New-Object System.Net.Cookie("PHPSESSID", "", "/", "api.leafone.cn")))
-    $session.Cookies.Add((New-Object System.Net.Cookie("notice", "1", "/", "api.leafone.cn")))
-    $request_ = Invoke-WebRequest -UseBasicParsing -Uri "$bepInEXUrl" `
-      -WebSession $session `
-      -OutFile $bepInEXDownloadPath `
-      -Headers @{
-        "method"="GET"
-        "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-        "accept-encoding"="gzip, deflate, br, zstd"
-        "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-        "priority"="u=0, i"
-        "sec-ch-ua"="`"Microsoft Edge`";v=`"125`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
-        "sec-ch-ua-mobile"="?0"
-        "sec-ch-ua-platform"="`"Windows`""
-        "sec-fetch-dest"="document"
-        "sec-fetch-mode"="navigate"
-        "sec-fetch-site"="none"
-        "sec-fetch-user"="?1"
-        "upgrade-insecure-requests"="1"
-      }
-      if ($? -eq $true)  #无报错就校验并解压
+    $result = DownloadBinary-MLink $bepInEXDownloadPath $bepInEXUrls
+      if ($result -ne $false)  #无报错就校验并解压
       {
         $hash_ = (Get-FileHash $bepInEXDownloadPath -Algorithm SHA256).Hash
         Write-Host "下载的 BepInEX 的Hash: $hash_"
@@ -328,23 +336,23 @@ function Apply-BepInEXCN {
           Expand-Archive -Path $bepInEXDownloadPath -DestinationPath $global:gamePath -Force  #强制覆盖
           if ($? -eq $true) {
             Write-Host "BepInEX 已安装"           
-            return;
+            return $null;
           }
           else { #错误处理
            Write-Warning "BepInEX 安装失败"
-           return;
+           return $null;
           }
         }
         else #错误处理
         { 
           Write-Warning "下载的 BepInEX 校验不通过，请反馈或重新下载或向服务器请求过快，请反馈或稍后重新下载（重新运行脚本），或更换网络环境"
-          return;
+          return $null;
         }
       }
       else #错误处理
       {
         Write-Warning "BepInEX 下载失败，请反馈或重新下载"        
-        retrun;
+        return $null;
       }
    }
 }
@@ -432,6 +440,7 @@ else { iex $global:corelibSrc; }
 #>
 
 MLangWrite-Output "初始化环境 ..." "Initing env ...";
+Write-Output "!Corelib v1";
 
 #32位检测
 if ([Environment]::Is32BitOperatingSystem) {
