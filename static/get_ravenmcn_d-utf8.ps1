@@ -8,20 +8,31 @@ function Exit-IScript {
   Exit-IScript
 }
 
+function DownloadString-MLink([string[]]$links) {
+        foreach ($link in $links) {
+                    Write-Host "Fetching ..."
+                            $result = $w.DownloadString("$link"); 
+                                    if ( $result -ne $null ) {
+                                                    return $result
+                                    }
+        }
+}
+                                    }
+        }
+}
+
 
 #初始化依赖lib
 $w=(New-Object System.Net.WebClient);
 $w.Encoding=[System.Text.Encoding]::UTF8;
-$global:corelibSrc = $null
-$global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
-if ( $global:corelibSrc -eq $null ) {
-  $global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1'); 
-}
+$global:corelibSrc = DownloadString-MLink ('https://gitee.com/RavenfieldCommunity/UnionSetup/raw/master/corelib-utf8.txt','https://ravenfieldcommunity.github.io/static/corelib-utf8.ps1',  'https://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1')
+
 if ( $global:corelibSrc -eq $null ) {
   Write-Warning "无法初始化依赖库";
   Exit-IScript;
 }
 else { iex $global:corelibSrc; }
+
 
 function Apply-RavenMCN {
   $ravenmCNDownloadPath = "$global:downloadPath\RavenMCN.zip"  #RavenMCN下载到的本地文件
