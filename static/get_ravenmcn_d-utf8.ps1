@@ -17,9 +17,7 @@ function DownloadString-MLink([string[]]$links) {
                                     }
         }
 }
-                                    }
-        }
-}
+                                  
 
 
 #初始化依赖lib
