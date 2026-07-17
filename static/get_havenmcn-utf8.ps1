@@ -2,13 +2,13 @@
 #感谢: BartJolling/ps-steam-cmd
 
 function MLangWrite-Output ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
-	else { Write-Output $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Output $cn }
+  else { Write-Output $en }
 }
 
 function MLangWrite-Warning ([string]$cn, [string]$en) {
-	if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
-	else { Write-Warning $en }
+  if ((Get-Culture).Name -eq "zh-CN") { Write-Warning $cn }
+  else { Write-Warning $en }
 }
 
 #退出脚本递归，但必须在各ps脚本手动定义
@@ -19,8 +19,8 @@ function Exit-IScript {
 }
 
 #初始化依赖lib
-$w=(New-Object System.Net.WebClient);
-$w.Encoding=[System.Text.Encoding]::UTF8;
+$w = (New-Object System.Net.WebClient);
+$w.Encoding = [System.Text.Encoding]::UTF8;
 $global:corelibSrc = $null
 $global:corelibSrc = $w.DownloadString('http://ravenfieldcommunity.github.io/static/corelib-utf8.ps1'); 
 if ( $global:corelibSrc -eq $null ) {
@@ -43,38 +43,39 @@ function Apply-HavenM {
   $global:downloadUrl = $null
   Write-Host "是否使用KGithub加速?"
   $yesRun = Read-Host -Prompt "按 任意键并回车 确定，直接回车取消使用加速:>"
-  if ($yesRun  -eq "1") { $global:downloadUrl = "https://gh.llkk.cc/https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
+  if ($yesRun -eq "1") { $global:downloadUrl = "https://gh.llkk.cc/https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
   else { $global:downloadUrl = "https://github.com/RavenfieldCommunity/HavenM/releases/latest/download/Assembly-CSharp.dll" }
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri $global:downloadUrl `
     -WebSession $session `
     -OutFile $havenMDownloadPath `
     -Headers @{
-    "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-    "accept-encoding"="gzip, deflate, br, zstd"
-   }
-    if ($? -eq $true) {
-      if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	    Read-Host "更新需要关闭游戏，请按 回车键 继续:>"
-		taskkill /f /im ravenfield.exe
-        Wait-Process -Name "ravenfield" -Timeout 10
-      }	
-	  Write-Host "正在安装 HavenM ..."
-      Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
-      if ($? -ne $true) {
-        Write-Warning "HavenM 安装失败" 
-      } else  { Write-Host "HavenM 安装成功" }
+    "accept"          = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+    "accept-encoding" = "gzip, deflate, br, zstd"
+  }
+  if ($? -eq $true) {
+    if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
+      Read-Host "更新需要关闭游戏，请按 回车键 继续:>"
+      taskkill /f /im ravenfield.exe
+      Wait-Process -Name "ravenfield" -Timeout 10
+    }	
+    Write-Host "正在安装 HavenM ..."
+    Copy-Item -Path $havenMDownloadPath -Destination "$global:gamePath\ravenfield_Data\Managed\Assembly-CSharp.dll" -Force
+    if ($? -ne $true) {
+      Write-Warning "HavenM 安装失败" 
     }
-	#错误处理
-    else  {
-      Write-Warning "HavenM 下载失败"        
-    }
+    else { Write-Host "HavenM 安装成功" }
+  }
+  #错误处理
+  else {
+    Write-Warning "HavenM 下载失败"        
+  }
 }
 
 ###主程序
 Write-Host "# HavenM 安装脚本
 # HavenM 由 Stand_Up 维护
 # 安装脚本 由 Github@RavenfieldCommunity 维护
-# Discord 服务器: 非公开
+# Discord 服务器: 看Steam
 # 参见: https://github.com/RavenfieldCommunity/HavenM
 # 参见: https://ravenfieldcommunity.github.io/docs/en/Projects/havenm.html
 

@@ -6,6 +6,9 @@ echo ""
 echo "# Tip：Re-installing => Udpating"
 echo ""
 
+PrintWarning "THIS SCRIPT IT ALREADY DEPRECATED, use maunal installation instead"
+ExitScript
+
 PrintWarning(){
   echo -e "\e[33mWARNING: $1\e[0m"
 }

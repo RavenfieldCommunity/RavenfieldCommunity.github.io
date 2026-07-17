@@ -21,7 +21,7 @@ $exePath = "$folderPath\RavenM一键安装工具.exe"
 $ravenMCNUrlID = "ih1aS1z0ofne"
 $ravenMCNUrlHash = "946539FC1FF3B99D148190AD04435FAF9CBDD7706DBE8159528B91D7ED556F78"
 
-if ( (Test-Path -Path $folderPath)-ne $true) {$result_ = mkdir $folderPath}
+if ( (Test-Path -Path $folderPath) -ne $true) { $result_ = mkdir $folderPath }
 
 #打印下载目录
 Write-Host "下载目录：$folderPath"
@@ -38,33 +38,31 @@ function Download-RavenMCN {
     -WebSession $session `
     -OutFile $tempPath `
     -Headers @{
-      "authority"="api.leafone.cn"
-      "method"="GET"
-      "path"="/api/lanzou?url=https://www.lanzouj.com/$($ravenMCNUrlID)&type=down"
-      "scheme"="https"
-      "accept"="text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-      "accept-encoding"="gzip, deflate, br, zstd"
-      "accept-language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-      "priority"="u=0, i"
-      "sec-ch-ua"="`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
-      "sec-ch-ua-mobile"="?0"
-      "sec-ch-ua-platform"="`"Windows`""
-      "sec-fetch-dest"="document"
-      "sec-fetch-mode"="navigate"
-      "sec-fetch-site"="none"
-      "sec-fetch-user"="?1"
-      "upgrade-insecure-requests"="1"
-    }
-    $error_ = $_
-    if ($error_ -eq $null)
-    {
-      if ( CheckAndApplyTemp-RavenMCN ) { return $true }
-      else { retrun $false }
-    }
-    else
-    {
-      retrun $false
-    }
+    "authority"                 = "api.leafone.cn"
+    "method"                    = "GET"
+    "path"                      = "/api/lanzou?url=https://www.lanzouj.com/$($ravenMCNUrlID)&type=down"
+    "scheme"                    = "https"
+    "accept"                    = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+    "accept-encoding"           = "gzip, deflate, br, zstd"
+    "accept-language"           = "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+    "priority"                  = "u=0, i"
+    "sec-ch-ua"                 = "`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"125`", `"Not.A/Brand`";v=`"24`""
+    "sec-ch-ua-mobile"          = "?0"
+    "sec-ch-ua-platform"        = "`"Windows`""
+    "sec-fetch-dest"            = "document"
+    "sec-fetch-mode"            = "navigate"
+    "sec-fetch-site"            = "none"
+    "sec-fetch-user"            = "?1"
+    "upgrade-insecure-requests" = "1"
+  }
+  $error_ = $_
+  if ($error_ -eq $null) {
+    if ( CheckAndApplyTemp-RavenMCN ) { return $true }
+    else { retrun $false }
+  }
+  else {
+    retrun $false
+  }
     
 }
 
@@ -72,14 +70,12 @@ function CheckAndApplyTemp-RavenMCN {
   #校验hash
   $hash = (Get-FileHash $tempPath -Algorithm SHA256).Hash
   Write-Host "下载的安装文件的Hash: $hash"
-  if ($hash -eq $ravenMCNUrlHash) 
-  { 
+  if ($hash -eq $ravenMCNUrlHash) { 
     Copy-Item -Path $tempPath -Destination $zipPath
     if ($_ -eq $null) { return $true }
     else { return $false }
   }
-  else 
-  { 
+  else { 
     Write-Host "下载的安装文件校验不通过，请反馈或重新下载"
     return $false
   }
@@ -89,8 +85,7 @@ function CheckAndRunLocal-RavenMCN {
   #校验hash
   $hash = (Get-FileHash $zipPath -Algorithm SHA256).Hash
   Write-Host "安装文件Hash: $hash"
-  if ($hash -eq $ravenMCNUrlHash) 
-  { 
+  if ($hash -eq $ravenMCNUrlHash) { 
     #解压
     Write-Host "正在启动文件 ..."
     Expand-Archive $zipPath -DestinationPath $folderPath -Force
@@ -100,8 +95,7 @@ function CheckAndRunLocal-RavenMCN {
     $result_ = Read-Host -Prompt "请等待安装工具出现时再关闭本窗口"
     return $true
   }
-  else 
-  { 
+  else { 
     Write-Host "安装文件校验不通过，请反馈或重新下载"
     UpdateLocal-RavenMCN
     return $false
@@ -114,42 +108,35 @@ function UpdateLocal-RavenMCN {
 }
 
 function MainGet-RavenMCN {
-  if (Download-RavenMCN -eq $true)
-  {
+  if (Download-RavenMCN -eq $true) {
     Write-Host "安装文件下载并应用成功"
     $result_ = CheckAndRunLocal-RavenMCN
   }
-  else
-  {
+  else {
     Write-Host "安装文件下载或应用失败，请检查网络或反馈"
   }
 }
 
-function Exit-IScript
-{
+function Exit-IScript {
   Read-Host "您现在可以关闭窗口了"
   exit
   Exit-IScript
 }
 
 #主代码
-if ( (Test-Path -Path $zipPath) -eq $true)
-{
+if ( (Test-Path -Path $zipPath) -eq $true) {
   Write-Host "本地存在安装文件, 是否直接运行？" 
   $yesRun = Read-Host -Prompt "按 回车键 则直接运行本地安装文件，按 任意键并回车 则重新下载:>"
-  if ($yesRun  -eq "")
-  {
+  if ($yesRun -eq "") {
     $result_ = CheckAndRunLocal-RavenMCN
     Exit-IScript
   }
-  else
-  {
+  else {
     MainGet-RavenMCN
     Exit-IScript
   }
 }
-else
-{ 
+else { 
   MainGet-RavenMCN
   Exit-IScript
 }

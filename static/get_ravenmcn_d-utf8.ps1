@@ -8,31 +8,30 @@ function Exit-IScript {
   Exit-IScript
 }
 
-function DownloadString-MLink([string[]]$links) {
-        foreach ($link in $links) {
-                    Write-Host "Fetching ..."
-                            $result = $w.DownloadString("$link"); 
-                                    if ( $result -ne $null ) {
-                                                    return $result
-                                    }
-        }
+function Get-MLinkString([string[]]$links) {
+  foreach ($link in $links) {
+    Write-Host "Fetching ..."
+    $result = $w.DownloadString("$link"); 
+    if ( $null -ne $result ) {
+      return $result
+    }
+  }
 }
-                                  
 
 
 #初始化依赖lib
-$w=(New-Object System.Net.WebClient);
-$w.Encoding=[System.Text.Encoding]::UTF8;
-$global:corelibSrc = DownloadString-MLink ('https://gitee.com/RavenfieldCommunity/UnionSetup/raw/master/corelib-utf8.txt','https://ravenfieldcommunity.github.io/static/corelib-utf8.ps1',  'https://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1')
+$w = (New-Object System.Net.WebClient);
+$w.Encoding = [System.Text.Encoding]::UTF8;
+$global:corelibSrc = Get-MLinkString ('https://gitee.com/RavenfieldCommunity/UnionSetup/raw/master/corelib-utf8.txt', 'https://ravenfieldcommunity.github.io/static/corelib-utf8.ps1', 'https://ravenfieldcommunity-static.netlify.app/corelib-utf8.ps1')
 
-if ( $global:corelibSrc -eq $null ) {
+if ( $null -eq $global:corelibSrc ) {
   Write-Warning "无法初始化依赖库";
   Exit-IScript;
 }
-else { iex $global:corelibSrc; }
+else { Invoke-Expression $global:corelibSrc; }
 
 
-function Apply-RavenMCN {
+function Get-RavenMCN {
   $ravenmCNDownloadPath = "$global:downloadPath\RavenMCN.zip"  #RavenMCN下载到的本地文件
   
   #创建session并使用直链api请求文件
@@ -53,67 +52,66 @@ function Apply-RavenMCN {
   $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lpvt_000", "000", "/", ".gitee.com")))
   $session.Cookies.Add((New-Object System.Net.Cookie("gitee-session-n", "", "/", ".gitee.com")))
   $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/372833" `
-  -WebSession $session `
-  -Headers @{
-    "Accept"="application/json, text/plain, */*"
-    "Accept-Encoding"="gzip, deflate, br, zstd"
-    "Accept-Language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-    "DNT"="1"
-    "Referer"="https://gitee.com/api/v5/swagger"
-    "Sec-Fetch-Dest"="empty"
-    "Sec-Fetch-Mode"="cors"
-    "Sec-Fetch-Site"="same-origin"
-     "sec-ch-ua"="`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
-    "sec-ch-ua-mobile"="?0"
-    "sec-ch-ua-platform"="`"Windows`""
+    -WebSession $session `
+    -Headers @{
+    "Accept"             = "application/json, text/plain, */*"
+    "Accept-Encoding"    = "gzip, deflate, br, zstd"
+    "Accept-Language"    = "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+    "DNT"                = "1"
+    "Referer"            = "https://gitee.com/api/v5/swagger"
+    "Sec-Fetch-Dest"     = "empty"
+    "Sec-Fetch-Mode"     = "cors"
+    "Sec-Fetch-Site"     = "same-origin"
+    "sec-ch-ua"          = "`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
+    "sec-ch-ua-mobile"   = "?0"
+    "sec-ch-ua-platform" = "`"Windows`""
   } `
-  -ContentType "application/json;charset=utf-8"
+    -ContentType "application/json;charset=utf-8"
   if ($? -eq $true) {
-  $json_ = $request_.Content | ConvertFrom-Json
-  Write-Host "正在下载 RavenMCN ($($json_.name)) ..."
-  $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
-  -WebSession $session `
-  -OutFile $ravenmCNDownloadPath `
-  -Headers @{
-    "Accept"="gzip, deflate, br, zstd"
-    "Accept-Encoding"="gzip, deflate, br, zstd"
-    "Accept-Language"="zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
-    "DNT"="1"
-    "Referer"="https://gitee.com/api/v5/swagger"
-    "Sec-Fetch-Dest"="document"
-    "Sec-Fetch-Mode"="cors"
-    "Sec-Fetch-Site"="same-origin"
-    "sec-ch-ua"="`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
-    "sec-ch-ua-mobile"="?0"
-    "sec-ch-ua-platform"="`"Windows`""
-  } `
-  -ContentType "application/zip"
-  if ($? -eq $true) {
-  Write-Host "RavenMCN 已下载"   
-		if ( $(tasklist | findstr "ravenfield") -ne $null ) { 
-	  Read-Host "需要关闭游戏，请按 回车键 继续:>"
-		taskkill /f /im ravenfield.exe
-  Wait-Process -Name "ravenfield" -Timeout 10
-  }	
-  Expand-Archive -Path $ravenmCNDownloadPath -DestinationPath "$global:gamePath\BepInEx\plugins" -Force
-  if ($? -eq $true) {
-    Write-Host "RavenMCN 已安装"     
-    return $true 
+    $json_ = $request_.Content | ConvertFrom-Json
+    Write-Host "正在下载 RavenMCN ($($json_.name)) ..."
+    $request2_ = Invoke-WebRequest -UseBasicParsing -Uri $json_.assets[0].browser_download_url `
+      -WebSession $session `
+      -OutFile $ravenmCNDownloadPath `
+      -Headers @{
+      "Accept"             = "gzip, deflate, br, zstd"
+      "Accept-Encoding"    = "gzip, deflate, br, zstd"
+      "Accept-Language"    = "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+      "DNT"                = "1"
+      "Referer"            = "https://gitee.com/api/v5/swagger"
+      "Sec-Fetch-Dest"     = "document"
+      "Sec-Fetch-Mode"     = "cors"
+      "Sec-Fetch-Site"     = "same-origin"
+      "sec-ch-ua"          = "`"Microsoft Edge`";v=`"131`", `"Chromium`";v=`"131`", `"Not_A Brand`";v=`"24`""
+      "sec-ch-ua-mobile"   = "?0"
+      "sec-ch-ua-platform" = "`"Windows`""
+    } `
+      -ContentType "application/zip"
+    if ($? -eq $true) {
+      Write-Host "RavenMCN 已下载"   
+      if ( $null -ne $(tasklist | findstr "ravenfield") ) { 
+        Read-Host "需要关闭游戏，请按 回车键 继续:>"
+        taskkill /f /im ravenfield.exe
+        Wait-Process -Name "ravenfield" -Timeout 10
+      }	
+      Expand-Archive -Path $ravenmCNDownloadPath -DestinationPath "$global:gamePath\BepInEx\plugins" -Force
+      if ($? -eq $true) {
+        Write-Host "RavenMCN 已安装"     
+        return $true 
+      }
+      else {
+        Write-Warning "RavenMCN 安装失败"
+        return $false 
+      }
+    }
+    else { 
+      Write-Warning "RavenMCN 下载失败或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
+      return $false
+    }   
   }
   else {
-    Write-Warning "RavenMCN 安装失败"
+    Write-Warning "无法获取 RavenMCN 信息或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
     return $false 
-  }
-  }
-  else 
-  { 
-    Write-Warning "RavenMCN 下载失败或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
-    return $false
-  }   
-  }
-  else {
-  Write-Warning "无法获取 RavenMCN 信息或向服务器请求过快, 请反馈或稍后重新下载(重新运行脚本)"
-  return $false 
   }
 }
 
@@ -128,10 +126,10 @@ Write-Host "# RavenM联机插件 直接安装脚本
 # 提示: 本安装脚本不适用类Unix
 "
 
-if ( $(tasklist | findstr "msedge") -ne $null -or $(tasklist | findstr "chrome") -ne $null ) {
-    start "https://ravenfieldcommunity.github.io/docs/cn/Projects/ravenm.html#%E4%BD%BF%E7%94%A8"
+if ( $null -ne $(tasklist | findstr "msedge") -or $null -ne $(tasklist | findstr "chrome") ) {
+  Start-Process "https://ravenfieldcommunity.github.io/docs/cn/Projects/ravenm.html#%E4%BD%BF%E7%94%A8"
 }
 
-Apply-BepInEXCN
-$temp_ = Apply-RavenMCN
+Get-BepInEXCN
+$temp_ = Get-RavenMCN
 Exit-IScript
