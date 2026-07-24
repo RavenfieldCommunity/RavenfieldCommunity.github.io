@@ -159,7 +159,7 @@ function Get-MLinkBinary([string]$path, [string[]]$links) {
   foreach ($link in $links) {
     Write-Host "Downloading ...";
     $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession;
-    $session.UserAgent = "Mozilla/5.0 (Windows NT 11.0`; Win64`; x64) AppleWebKit/543.36 (KHTML`, like Gecko) Chrome/138.0.0.0 Safari/543.36 Edg/138.0.0.0";
+    $session.UserAgent = "Mozilla/5.0 (Windows NT 11.0`; Win64`; x64) AppleWebKit/543.36 (KHTML`, like Gecko) Chrome/142.0.0.0 Safari/562.36 Edg/142.0.0.0";
     $request_ = Invoke-WebRequest -UseBasicParsing -Uri $link `
       -WebSession $session `
       -OutFile $path `
@@ -169,7 +169,7 @@ function Get-MLinkBinary([string]$path, [string[]]$links) {
       "accept-encoding"           = "gzip`, deflate`, br`, zstd"
       "accept-language"           = "zh-CN`,zh`;q=0.9`,en`;q=0.8`,en-GB`;q=0.7`,en-US`;q=0.6"
       "priority"                  = "u=0`, i"
-      "sec-ch-ua"                 = "`"Microsoft Edge`"`;v=`"138`"`, `"Chromium`"`;v=`"138`"`, `"Not.A/Brand`"`;v=`"27`""
+      "sec-ch-ua"                 = "`"Microsoft Edge`"`;v=`"142`"`, `"Chromium`"`;v=`"138`"`, `"Not.A/Brand`"`;v=`"27`""
       "sec-ch-ua-mobile"          = "?0"
       "sec-ch-ua-platform"        = "`"Windows`""
       "sec-fetch-dest"            = "document"
@@ -240,6 +240,16 @@ $bepInEXDownloadPath = "$global:downloadPath\BepInEX.zip"
 $exeNameNoSubfix = "ravenfield"
 $bepInEXInfo = "5.4.22 for windows x64"
 
+function Get-GameLibPathSub ([PSCustomObject] $libraryfolders) {
+  $lowCount = ($libraryfolders | Get-Member -MemberType NoteProperty).Count - 1;
+  $count = 0..$lowCount;
+  foreach ($num in $count) {
+    #手动递归
+    if ($null -ne $libraryfolders."$num".apps."$appID") {
+      return $libraryfolders."$num".path.Replace('\\', '\'); 
+    }
+  }
+}
 
 function Get-GameLibPath {
   #使用方式1
@@ -252,17 +262,16 @@ function Get-GameLibPath {
       #错误处理
       Write-MLangWarning "方式1 无法获取Libraryfolders" "Method1 fail";
     }
-    $parsedVdf = $result_.libraryfolders;
-    $lowCount = ($parsedVdf | Get-Member -MemberType NoteProperty).Count - 1;
-    $count = 0..$lowCount;
-    foreach ($num in $count) {
-      #手动递归
-      if ($null -ne $parsedVdf."$num".apps."$appID") {
-        return $parsedVdf."$num".path.Replace('\\', '\'); 
+    else {
+      $targetPath = Get-GameLibPathSub $result_.libraryfolders;
+      if ((Test-Path $targetPath) -ne $true) {
+        #错误处理
+        Write-MLangWarning "方式1 无法获取游戏安装路径或未安装游戏" "Method1 fail";
+      }
+      else {
+        return $targetPath;
       }
     }
-    #错误处理
-    Write-MLangWarning "方式1 无法获取游戏安装路径或未安装游戏" "Method1 fail";
   }
   
   #使用方式2
@@ -270,40 +279,51 @@ function Get-GameLibPath {
     #错误处理
     Write-MLangWarning "方式2 无法获取Libraryfolders" "Method2 fail";
   }
-  $originalString = Get-Content("$steamPath\steamapps\libraryfolders.vdf");
-  $result_ = $vdf.Deserialize( $originalString );
-  if ($? -eq $true) { 
-    $parsedVdf = $result_.libraryfolders;
-    $lowCount = ($parsedVdf | Get-Member -MemberType NoteProperty).Count - 1;
-    $count = 0..$lowCount;
-    foreach ($num in $count) {
-      #手动递归
-      if ($null -ne $parsedVdf."$num".apps."$appID") { 
-        return $parsedVdf."$num".path.Replace('\\', '\'); 
+  else {
+    $originalString = Get-Content("$steamPath\steamapps\libraryfolders.vdf");
+    $result_ = $vdf.Deserialize( $originalString );
+    if ($? -eq $true) { 
+      $targetPath = Get-GameLibPathSub $result_.libraryfolders;
+      if ((Test-Path $targetPath) -ne $true) {
+        #错误处理
+        Write-MLangWarning "方式2 无法获取游戏安装路径或未安装游戏" "Method2 fail";
+      }
+      else {
+        return $targetPath;
       }
     }
     #错误处理
-    Write-MLangWarning "方式2 无法获取游戏安装路径或未安装游戏" "Method2 fail";
   }
   
   #使用方式3
-  if ( (Test-Path -Path "$steamPath\steamapps\common\Ravenfield") -eq $true ) {
+  if ( (Test-Path -Path "$($global:steamPath)\steamapps\common\Ravenfield\") -eq $true ) {
     #如果存在
     return $steamPath
   }
   else {
     Write-MLangWarning "方式3 无法获取Libraryfolders" "Method3 fail";
   }	  
-  #使用方式4
+
+  # 4
+  $targetPath = "$((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App $appID").InstallLocation)".Replace('/', '\');
+  if ( (Test-Path -Path $targetPath) -eq $true ) {
+    #如果存在
+    return $targetPath
+  }
+  else {
+    Write-MLangWarning "方式3 无法获取Libraryfolders" "Method3 fail";
+  }
+  
+  #使用方式5
   if (Get-MLangInfo) {
     $global:inputGameExePath = Read-Host "为了获取游戏安装路径, 请打开游戏安装目录，将游戏exe拖入这里, 然后按 回车键 继续:>";
   }
   else {
     $global:inputGameExePath = Read-Host "To get the game install path, please open the game installation path and drag the game exe here, then press Enter:>";
   }
-  $result_ = Split-Path -Path ($global:inputGameExePath.Replace("`"","").Replace("'","")) -Parent;
+  $result_ = Split-Path -Path ($global:inputGameExePath.Replace("`"", "").Replace("'", "")) -Parent;
   if ( (Test-Path $result_) -eq $true ) {
-    $global:gamePath = $result_;  #游戏本体位置
+    $global:gamePath = $result_; #游戏本体位置
     return "$result_\..\..\..\";
   }
   Write-MLangWarning "方式4 无法获取游戏安装位置" "Method4 fail";
@@ -390,7 +410,7 @@ function Get-BepInEXCN {
 
 
 Write-MLangOutput "初始化环境 ..." "Initing env ...";
-Write-Output "!Corelib v2";
+Write-Output "!Corelib v3";
 
 #32位检测
 if ([Environment]::Is32BitOperatingSystem) {
@@ -409,7 +429,13 @@ $global:gamePath = "";
 
 #获取steam安装路径
 $global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/', '\');
-if ($? -ne $true) {
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
+  $global:steamPath = "$((Get-ItemProperty HKLM:\Software\Valve\Steam).InstallPath)".Replace('/', '\');
+}
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
+  $global:steamPath = "$((Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Valve\Steam).InstallPath)".Replace('/', '\');
+}
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
   Write-MLangOutput "无法获取Steam安装路径" "Cannot get steam path";
   Exit-IScript
 }

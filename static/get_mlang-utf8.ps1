@@ -55,12 +55,23 @@ function Get-TMFont {
     }
   }
   
+  #询问下载
   Write-Host "是否安装用于EA32及以后的字体补丁? 可用字体:
-1. 文泉驿点阵 12px (推荐, 最小体积)
-2. Noto CJK
-3. 微软雅黑
+1. 文泉驿点阵 12px (约2MB) (推荐, 最小体积)
+2. Noto CJK (约30MB) (次推荐, 方便不偏好第一个像素字体的玩家)
+3. 微软雅黑 (约145MB)
 4. 不安装, 使用原版（可能影响观感，除非其他选项无法使用否则不建议）"
   $yesRun = Read-Host -Prompt "按 对应序号数字键 并按 回车Enter 以确定，直接回车 或任意键 默认使用第一项:>"
+
+  #下载方式
+  if ($yesRun -ne "4") {
+    Write-Host "下载方式:
+1. Steam工坊
+2. Git镜像"
+    $prompt_DownloadSource = Read-Host -Prompt "按 对应序号数字键 并按 回车Enter 以确定，直接回车 或任意键 默认使用第一项:>"
+  }
+
+  #定义字体名
   if ($yesRun -eq "2") { 
     $global:downloadUrl = "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/arialuni_sdf_u2019" 
     $global:fontName = "arialuni_sdf_u2019"
@@ -74,9 +85,26 @@ function Get-TMFont {
     return $null;
   }
   else {
-    $global:downloadUrls = ("https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf", "https://gitee.com/RavenfieldCommunity/UnionSetup/releases/download/res/wenquanyi_bitmap_song_12px_sdf", "https://gh.llkk.cc/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf") 
+    $global:downloadUrls = ("https://gitee.com/RavenfieldCommunity/UnionSetup/releases/download/res/wenquanyi_bitmap_song_12px_sdf", "https://ghproxy.net/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf", "https://gh.llkk.cc/github.com/RavenfieldCommunity/RavenfieldCommunity.github.io/releases/download/resources/wenquanyi_bitmap_song_12px_sdf") 
     $global:fontName = "wenquanyi_bitmap_song_12px_sdf"	 
   }
+
+  #下载判断
+  if ($prompt_DownloadSource -ne "2"){
+    Start-Process "https://steamcommunity.com/sharedfiles/filedetails/?id=3770750454";
+    Write-Host "请先订阅字体补丁（不是汉化文件）：
+https://steamcommunity.com/sharedfiles/filedetails/?id=3770750454";
+    $result_ = Read-Host -Prompt "按 回车 继续:>";
+    $folderPath = "$global:gameLibPath\steamapps\workshop\content\$appID\3770750454\";
+    Copy-Item "$folderPath\$($global:fontName)" "$global:gamePath" -Force;
+    if ($? -ne $true) {
+      $result_ = Read-Host -Prompt"安装字体失败，是否已经订阅了字体文件（关闭该窗口并重新运行命令以重新从工坊安装）？按 回车 忽略错误并继续在线下载:>"
+    }
+    else {
+      return $null;
+    }
+  }
+
   $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
   Write-Host "正在下载 字体补丁 ($($global:fontName)) ..." 
   if ($global:fontName -ne "wenquanyi_bitmap_song_12px_sdf") {
@@ -234,7 +262,17 @@ Write-Host "# RF社区多语言 简体中文 安装脚本
 
 if ( $null -ne $(tasklist | findstr "msedge") -or $null -ne $(tasklist | findstr "chrome") ) {
   if ($null -eq $(tasklist | findstr "ravenfield")) {
-    Start-Process "https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang.html#%E6%8F%90%E7%A4%BA"
+    $pingTest = {
+      $pingResult_ = ping ravenfieldcommunity.netlify.app -n 2;
+      if ($pingResult_[-1].Contains("100% 丢失"))
+      {
+        Start-Process "https://ravenfieldcommunity.github.io/docs/cn/Projects/mlang.html#%E6%8F%90%E7%A4%BA";
+      }
+      else {
+        Start-Process "https://ravenfieldcommunity.netlify.app/cn/Projects/mlang.html#%E6%8F%90%E7%A4%BA";
+      }
+    }
+    $result_ = Start-job $pingTest;
   }
 }
 

@@ -51,7 +51,7 @@ function Get-RavenMCN {
   $session.Cookies.Add((New-Object System.Net.Cookie("HMACCOUNT", "000", "/", ".gitee.com")))
   $session.Cookies.Add((New-Object System.Net.Cookie("Hm_lpvt_000", "000", "/", ".gitee.com")))
   $session.Cookies.Add((New-Object System.Net.Cookie("gitee-session-n", "", "/", ".gitee.com")))
-  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://gitee.com/api/v5/repos/RedQieMei/Raven-M/releases/372833" `
+  $request_ = Invoke-WebRequest -UseBasicParsing -Uri "https://gitee.com/api/v5/repos/qw124134/rfm/releases/758351" `
     -WebSession $session `
     -Headers @{
     "Accept"             = "application/json, text/plain, */*"
