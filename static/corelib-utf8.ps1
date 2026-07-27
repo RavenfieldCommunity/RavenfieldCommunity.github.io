@@ -252,7 +252,33 @@ function Get-GameLibPathSub ([PSCustomObject] $libraryfolders) {
 }
 
 function Get-GameLibPath {
+  $prefixPath = "\steamapps\common\Ravenfield\";
   #使用方式1
+  Write-MLangOutput "查找游戏：方式1" "Finding game: Method1";
+  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -ne $true ) {
+    #错误处理
+    Write-MLangWarning "方式1 无法获取Libraryfolders" "Method2 fail";
+  }
+  else {
+    $originalString = Get-Content("$steamPath\steamapps\libraryfolders.vdf");
+    $result_ = $vdf.Deserialize( $originalString );
+    if ($? -eq $true) { 
+      $targetPath = Get-GameLibPathSub $result_.libraryfolders;
+      if ((Test-Path "$targetPath\$prefixPath\ravenfield.exe") -ne $true) {
+        #错误处理
+        Write-MLangWarning "方式1 无法获取游戏安装路径或未安装游戏" "Method2 fail";
+      }
+      else {
+        $global:gameLibPath = $targetPath;
+        $global:gamePath = "$targetPath\$prefixPath\";
+        return $null;
+      }
+    }
+    #错误处理
+  }
+  
+  #使用方式2
+  Write-MLangOutput "查找游戏：方式2" "Finding game: Method2";
   if ( (Test-Path -Path "$steamPath\config\libraryfolders.vdf") -eq $true ) {
     #如果存在就获取并解析
     #获取vdf
@@ -260,45 +286,29 @@ function Get-GameLibPath {
     $result_ = $vdf.Deserialize( $originalString );
     if ($? -ne $true) { 
       #错误处理
-      Write-MLangWarning "方式1 无法获取Libraryfolders" "Method1 fail";
+      Write-MLangWarning "方式2 无法获取Libraryfolders" "Method1 fail";
     }
     else {
       $targetPath = Get-GameLibPathSub $result_.libraryfolders;
-      if ((Test-Path $targetPath) -ne $true) {
+      if ((Test-Path "$targetPath\$prefixPath\ravenfield.exe") -ne $true) {
         #错误处理
-        Write-MLangWarning "方式1 无法获取游戏安装路径或未安装游戏" "Method1 fail";
+        Write-MLangWarning "方式2 无法获取游戏安装路径或未安装游戏" "Method1 fail";
       }
       else {
-        return $targetPath;
+        $global:gameLibPath = $targetPath;
+        $global:gamePath = "$targetPath\$prefixPath\";
+        return $null;
       }
     }
-  }
-  
-  #使用方式2
-  if ( (Test-Path -Path "$steamPath\steamapps\libraryfolders.vdf") -ne $true ) {
-    #错误处理
-    Write-MLangWarning "方式2 无法获取Libraryfolders" "Method2 fail";
-  }
-  else {
-    $originalString = Get-Content("$steamPath\steamapps\libraryfolders.vdf");
-    $result_ = $vdf.Deserialize( $originalString );
-    if ($? -eq $true) { 
-      $targetPath = Get-GameLibPathSub $result_.libraryfolders;
-      if ((Test-Path $targetPath) -ne $true) {
-        #错误处理
-        Write-MLangWarning "方式2 无法获取游戏安装路径或未安装游戏" "Method2 fail";
-      }
-      else {
-        return $targetPath;
-      }
-    }
-    #错误处理
   }
   
   #使用方式3
-  if ( (Test-Path -Path "$($global:steamPath)\steamapps\common\Ravenfield\") -eq $true ) {
+  Write-MLangOutput "查找游戏：方式3" "Finding game: Method3";
+  if ( (Test-Path -Path "$($global:steamPath)\$prefixPath\ravenfield.exe") -eq $true ) {
     #如果存在
-    return $steamPath
+    $global:gameLibPath = $global:steamPath;
+    $global:gamePath = "$($global:steamPath)\$prefixPath";
+    return $null;
   }
   else {
     Write-MLangWarning "方式3 无法获取Libraryfolders" "Method3 fail";
@@ -308,10 +318,19 @@ function Get-GameLibPath {
   $targetPath = "$((Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App $appID").InstallLocation)".Replace('/', '\');
   if ( (Test-Path -Path $targetPath) -eq $true ) {
     #如果存在
-    return $targetPath
+    if ( $targetPath.Contains("ravenfield") -eq $true ) {
+      $global:gameLibPath = "$targetPath\..\..\..\";
+      $global:gamePath = $targetPath;
+      return $null;
+    }
+    else {
+      $global:gameLibPath = $targetPath;
+      $global:gamePath = "$targetPath\$prefixPath\";
+      return $null;
+    }
   }
   else {
-    Write-MLangWarning "方式3 无法获取Libraryfolders" "Method3 fail";
+    Write-MLangWarning "方式4 无法获取Libraryfolders" "Method3 fail";
   }
   
   #使用方式5
@@ -324,11 +343,85 @@ function Get-GameLibPath {
   $result_ = Split-Path -Path ($global:inputGameExePath.Replace("`"", "").Replace("'", "")) -Parent;
   if ( (Test-Path $result_) -eq $true ) {
     $global:gamePath = $result_; #游戏本体位置
-    return "$result_\..\..\..\";
+    $global:gameLibPath = "$result_\..\..\..\";
+    return $null;
   }
-  Write-MLangWarning "方式4 无法获取游戏安装位置" "Method4 fail";
-  return $null;
+  Write-MLangWarning "方式5 无法获取游戏安装位置" "Method4 fail";
 }
+
+###主程序
+#可用的global var:
+# $? 操作是否成功
+# $global:gameLibPath 游戏安装的steam库的位置
+# $global:gamePath 游戏本体位置
+# $global:downloadPath 统一下载位置
+#可用func:
+# Get-BepInEXGithub
+# Get-BepInEXCN
+#路径默认结尾无斜杠
+#func报错在主线程手动处理
+#未来：
+#  废弃bool返回报错
+#  统一缩进
+#union initer:
+
+
+Write-MLangOutput "初始化环境 ..." "Initing env ...";
+Write-Output "!Corelib v4";
+
+#32位检测
+if ([Environment]::Is32BitOperatingSystem) {
+  Write-MLangWarning "不支持本机的32位系统，需要手动安装!" "The script may not support 32-bit system!"; 
+  Exit-IScript
+}
+
+#初始化vdf
+#仅需要再次读写的变量才加上Global标志
+#初始化VDF解析器
+$vdf = [VdfDeserializer]::new();  
+#游戏安装的steam库的位置
+$global:gameLibPath = ""; 
+#游戏本体位置
+$global:gamePath = "";
+
+#获取steam安装路径
+$global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/', '\');
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
+  $global:steamPath = "$((Get-ItemProperty HKLM:\Software\Valve\Steam).InstallPath)".Replace('/', '\');
+}
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
+  $global:steamPath = "$((Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Valve\Steam).InstallPath)".Replace('/', '\');
+}
+if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
+  Write-MLangOutput "无法获取Steam安装路径" "Cannot get steam path";
+  Exit-IScript
+}
+Write-MLangOutput "Steam安装路径: $($global:steamPath)" "Steam path: $($global:steamPath)"
+
+#获取游戏库位置
+
+Get-GameLibPath;
+
+if ($overrideGamePath -ne $null) {
+  $global:gamePath = $overrideGamePath;
+  $global:gameLibPath = $overrideGameLibPath;
+}
+
+if ( $null -eq $global:gameLibPath ) {
+  Write-Host "Cannot get steam game lib path";
+}
+else {
+  Write-MLangOutput "游戏所在Steam库路径: $($global:gameLibPath)" "Game library path: $($global:gameLibPath)";
+}
+
+if ((Test-Path -Path $global:gamePath) -ne $true  ) {
+  Write-MLangWarning "无法获取游戏安装路径" "Cannot get game path";
+  Exit-IScript
+}
+
+Write-MLangOutput "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";
+  
+Write-Output "";
 
 function Get-BepInEXGithub {
   #如果已经安装就跳过
@@ -391,75 +484,3 @@ function Get-BepInEXCN {
   Write-Warning "BepInEX 安装失败";
   return $null;
 }
-
-###主程序
-#可用的global var:
-# $? 操作是否成功
-# $global:gameLibPath 游戏安装的steam库的位置
-# $global:gamePath 游戏本体位置
-# $global:downloadPath 统一下载位置
-#可用func:
-# Get-BepInEXGithub
-# Get-BepInEXCN
-#路径默认结尾无斜杠
-#func报错在主线程手动处理
-#未来：
-#  废弃bool返回报错
-#  统一缩进
-#union initer:
-
-
-Write-MLangOutput "初始化环境 ..." "Initing env ...";
-Write-Output "!Corelib v3";
-
-#32位检测
-if ([Environment]::Is32BitOperatingSystem) {
-  Write-MLangWarning "不支持本机的32位系统，需要手动安装!" "The script may not support 32-bit system!"; 
-  Exit-IScript
-}
-
-#初始化vdf
-#仅需要再次读写的变量才加上Global标志
-#初始化VDF解析器
-$vdf = [VdfDeserializer]::new();  
-#游戏安装的steam库的位置
-$global:gameLibPath = ""; 
-#游戏本体位置
-$global:gamePath = "";
-
-#获取steam安装路径
-$global:steamPath = "$((Get-ItemProperty HKCU:\Software\Valve\Steam).SteamPath)".Replace('/', '\');
-if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
-  $global:steamPath = "$((Get-ItemProperty HKLM:\Software\Valve\Steam).InstallPath)".Replace('/', '\');
-}
-if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
-  $global:steamPath = "$((Get-ItemProperty HKLM:\SOFTWARE\WOW6432Node\Valve\Steam).InstallPath)".Replace('/', '\');
-}
-if ( (Test-Path "$($global:steamPath)\steam.exe") -ne $true) {
-  Write-MLangOutput "无法获取Steam安装路径" "Cannot get steam path";
-  Exit-IScript
-}
-Write-MLangOutput "Steam安装路径: $($global:steamPath)" "Steam path: $($global:steamPath)"
-
-#获取游戏库位置
-
-$global:gameLibPath = Get-GameLibPath;
-
-if ( $null -eq $global:gameLibPath ) {
-  Write-Host "Cannot get steam lib path";
-}
-
-Write-MLangOutput "游戏所在Steam库路径: $($global:gameLibPath)" "Game library path: $($global:gameLibPath)";
-
-#计算游戏安装位置
-if ($global:gamePath -eq "") {
-  $global:gamePath = "$($global:gameLibPath)\steamapps\common\Ravenfield"; 
-}
-
-if ((Test-Path -Path $global:gamePath) -ne $true  ) {
-  Write-MLangWarning "无法获取游戏安装路径" "Cannot get game path";
-  Exit-IScript
-}
-Write-MLangOutput "游戏所在安装路径: $($global:gamePath)"  "Game path: $($global:gamePath)";
-  
-Write-Output "";
